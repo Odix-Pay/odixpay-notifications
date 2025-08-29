@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -7,13 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OdixPay.Notifications.Domain\OdixPay.Notifications.Domain.csproj" />
+	  <ProjectReference Include="..\OdixPay.Notifications.Contracts\OdixPay.Notifications.Contracts.csproj" />
+	  <ProjectReference Include="..\OdixPay.Notifications.Domain\OdixPay.Notifications.Domain.csproj" />	
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="15.0.1" />
     <PackageReference Include="FluentValidation" Version="11.9.0" />
     <PackageReference Include="MediatR" Version="12.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="9.0.8" />
   </ItemGroup>
 
 </Project>

@@ -8,6 +8,8 @@ using OdixPay.Notifications.Application.Commands;
 using OdixPay.Notifications.Application.Queries;
 using OdixPay.Notifications.Domain.DTO.Requests;
 using OdixPay.Notifications.API.Filters;
+using Microsoft.Extensions.Localization;
+using OdixPay.Notifications.Contracts.Resources.LocalizationResources;
 
 namespace OdixPay.Notifications.API.Controllers;
 
@@ -15,9 +17,17 @@ namespace OdixPay.Notifications.API.Controllers;
 [ApiController]
 [ApiVersion(ApiConstants.APIVersion.VersionString)]
 [Authorize(AuthenticationSchemes = ApiConstants.Authentication.CustomAuthScheme)]
-public class NotificationsController(IMediator mediator) : BaseController
+public class NotificationsController : BaseController
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IMediator _mediator;
+    private readonly IStringLocalizer<SharedResource> _IStringLocalizer;
+
+    public NotificationsController(IMediator mediator,
+                                    IStringLocalizer<SharedResource> IStringLocalizer) : base(IStringLocalizer)
+    {
+        _mediator = mediator;
+        _IStringLocalizer = IStringLocalizer;
+    }
 
     [HttpPost]
     [AuthorizeRoleFilter(Permission = Permissions.Notification.Create)]
@@ -61,7 +71,7 @@ public class NotificationsController(IMediator mediator) : BaseController
         [FromQuery] QueryNotifications query)
     {
         if (string.IsNullOrEmpty(userId))
-            return Unauthorized(StandardResponse<object, object>.ValidationError("User ID is required."));
+            return Unauthorized(StandardResponse<object, object>.ValidationError(_IStringLocalizer["UserIdIsRequired"]));
 
         var command = new GetNotificationsQuery()
         {
@@ -87,10 +97,10 @@ public class NotificationsController(IMediator mediator) : BaseController
     public async Task<IActionResult> GetUserNotifications(
         [FromQuery] QueryNotifications query)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException("User ID not found in claims.");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException(_IStringLocalizer["UserIDNotFoundInClaims"]);
 
         if (string.IsNullOrEmpty(userId))
-            return Unauthorized(StandardResponse<object, object>.ValidationError("User ID is required."));
+            return Unauthorized(StandardResponse<object, object>.ValidationError(_IStringLocalizer["UserIdIsRequired"]));
 
         var command = new GetNotificationsQuery()
         {
@@ -114,10 +124,10 @@ public class NotificationsController(IMediator mediator) : BaseController
     [HttpGet("account/unread-count")]
     public async Task<IActionResult> GetUserUnreadCount()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException("User ID not found in claims.");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException(_IStringLocalizer["UserIDNotFoundInClaims"]);
 
         if (string.IsNullOrEmpty(userId))
-            return Unauthorized(StandardResponse<object, object>.ValidationError("User ID is required."));
+            return Unauthorized(StandardResponse<object, object>.ValidationError(_IStringLocalizer["UserIdIsRequired"]));
 
         var query = new GetUnreadCountQuery(userId);
         var result = await _mediator.Send(query);

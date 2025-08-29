@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\OdixPay.Notifications.Application\OdixPay.Notifications.Application.csproj" />
     <ProjectReference Include="..\OdixPay.Notifications.Infrastructure\OdixPay.Notifications.Infrastructure.csproj" />
+    <ProjectReference Include="..\OdixPay.Notifications.Contracts\OdixPay.Notifications.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

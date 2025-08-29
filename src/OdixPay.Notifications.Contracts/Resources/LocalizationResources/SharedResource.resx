@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AnErrorOccurred" xml:space="preserve">
+    <value>An error occurred.</value>
+    <comment>An error occurred.</comment>
+  </data>
+  <data name="AnUnexpectedErrorOccurred" xml:space="preserve">
+    <value>An unexpected error occurred.</value>
+    <comment>An unexpected error occurred.</comment>
+  </data>
+  <data name="AnUnexpectedErrorOccurredWithDetails" xml:space="preserve">
+    <value>An unexpected error occurred: {0}</value>
+    <comment>An unexpected error occurred: {0}</comment>
+  </data>
+  <data name="BadRequest" xml:space="preserve">
+    <value>Bad request.</value>
+    <comment>Bad request.</comment>
+  </data>
+  <data name="CreateNotificationRequestCannotBeNull" xml:space="preserve">
+    <value>CreateNotificationRequest cannot be null.</value>
+    <comment>CreateNotificationRequest cannot be null.</comment>
+  </data>
+  <data name="FailedToSendNotification" xml:space="preserve">
+    <value>Failed to send notification.</value>
+    <comment>Failed to send notification.</comment>
+  </data>
+  <data name="IdIsRequired" xml:space="preserve">
+    <value>Id is required.</value>
+    <comment>Id is required.</comment>
+  </data>
+  <data name="InternalServerError" xml:space="preserve">
+    <value>Internal server error.</value>
+    <comment>Internal server error.</comment>
+  </data>
+  <data name="InvalidEmailRecipientProvided" xml:space="preserve">
+    <value>Invalid email recipient provided.</value>
+    <comment>Invalid email recipient provided.</comment>
+  </data>
+  <data name="InvalidPushRecipientProvided" xml:space="preserve">
+    <value>InvalidPushRecipientProvided</value>
+    <comment>Invalid push recipient provided</comment>
+  </data>
+  <data name="InvalidSMSRecipientProvided" xml:space="preserve">
+    <value>Invalid SMS recipient provided.</value>
+    <comment>Invalid SMS recipient provided.</comment>
+  </data>
+  <data name="InvalidTemplateVariablesProvided" xml:space="preserve">
+    <value>Invalid template variables provided.</value>
+    <comment>Invalid template variables provided.</comment>
+  </data>
+  <data name="InvalidValueForTheGivenType" xml:space="preserve">
+    <value>Invalid Value For The Given Type</value>
+    <comment>Invalid Value For The Given Type</comment>
+  </data>
+  <data name="NotificationIdCannotBeEmpty" xml:space="preserve">
+    <value>Notification ID cannot be empty.</value>
+    <comment>Notification ID cannot be empty.</comment>
+  </data>
+  <data name="NotificationRecipientNotFound" xml:space="preserve">
+    <value>Notification recipient not found.</value>
+    <comment>Notification recipient not found.</comment>
+  </data>
+  <data name="NotificationTemplateNotFound" xml:space="preserve">
+    <value>Notification template not found.</value>
+    <comment>Notification template not found.</comment>
+  </data>
+  <data name="OperationCompletedSuccessfully" xml:space="preserve">
+    <value>Operation completed successfully.</value>
+    <comment>Operation completed successfully.</comment>
+  </data>
+  <data name="PermissionMustBeSpecifiedInAuthorizeRoleFilter" xml:space="preserve">
+    <value>Permission must be specified in AuthorizeRole filter</value>
+    <comment>Permission must be specified in AuthorizeRole filter</comment>
+  </data>
+  <data name="ResourceCreatedSuccessfully" xml:space="preserve">
+    <value>Resource created successfully.</value>
+    <comment>Resource created successfully.</comment>
+  </data>
+  <data name="ResourceNotFound" xml:space="preserve">
+    <value>Resource not found.</value>
+    <comment>Resource not found.</comment>
+  </data>
+  <data name="TemplateInUseCannotBeDeleted" xml:space="preserve">
+    <value>Template with ID '{0}' is currently in use and cannot be deleted.</value>
+    <comment>Template with ID '{0}' is currently in use and cannot be deleted.</comment>
+  </data>
+  <data name="TemplateVariablesDoNotMatch" xml:space="preserve">
+    <value>Template variables do not match.</value>
+    <comment>Template variables do not match.</comment>
+  </data>
+  <data name="TemplateWithIdNotFound" xml:space="preserve">
+    <value>Template with ID '{0}' not found.</value>
+    <comment>Template with ID '{0}' not found.</comment>
+  </data>
+  <data name="TemplateWithNameAlreadyExisit" xml:space="preserve">
+    <value>Template with name '{0}' already exists.</value>
+    <comment>Template with name '{0}' already exists.</comment>
+  </data>
+  <data name="TemplateWithNameAlreadyExists" xml:space="preserve">
+    <value>Template with name '{0}' already exists.</value>
+    <comment>Template with name '{0}' already exists.</comment>
+  </data>
+  <data name="TheRequestedResourceWasNotFound" xml:space="preserve">
+    <value>The requested resource was not found.</value>
+    <comment>The requested resource was not found.</comment>
+  </data>
+  <data name="UnhandledExceptionOccurred" xml:space="preserve">
+    <value>Unhandled exception occurred.</value>
+    <comment>Unhandled exception occurred.</comment>
+  </data>
+  <data name="UserAlreadyHasATokenSetForThisType" xml:space="preserve">
+    <value>User already has a token set for this type</value>
+    <comment>User already has a token set for this type</comment>
+  </data>
+  <data name="UserIdCannotBeNullOrEmpty" xml:space="preserve">
+    <value>User ID cannot be null or empty.</value>
+    <comment>User ID cannot be null or empty.</comment>
+  </data>
+  <data name="UserIDClaimIsMissingOrEmpty" xml:space="preserve">
+    <value>User ID claim is missing or empty</value>
+    <comment>User ID claim is missing or empty</comment>
+  </data>
+  <data name="UserIdIsRequired" xml:space="preserve">
+    <value>User ID is required.</value>
+    <comment>User ID is required.</comment>
+  </data>
+  <data name="UserIDNotFoundInClaims" xml:space="preserve">
+    <value>User ID not found in claims.</value>
+    <comment>User ID not found in claims.</comment>
+  </data>
+  <data name="UserIsNotAuthorizedForTheRequestedAction" xml:space="preserve">
+    <value>User is not authorized for the requested action</value>
+    <comment>User is not authorized for the requested action</comment>
+  </data>
+  <data name="UserNotAuthenticated" xml:space="preserve">
+    <value>User is not authenticated</value>
+    <comment>User is not authenticated</comment>
+  </data>
+  <data name="UserRequestCannotBeNullOrEmpty" xml:space="preserve">
+    <value>User request cannot be null or empty.</value>
+    <comment>User request cannot be null or empty.</comment>
+  </data>
+  <data name="UserRoleClaimIsMissingOrEmpty" xml:space="preserve">
+    <value>User role claim is missing or empty</value>
+    <comment>User role claim is missing or empty</comment>
+  </data>
+</root>

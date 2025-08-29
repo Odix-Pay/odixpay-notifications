@@ -1,15 +1,16 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Localization;
 using OdixPay.Notifications.API.Constants;
 using OdixPay.Notifications.API.Models.Response;
+using OdixPay.Notifications.Contracts.Resources.LocalizationResources;
 using OdixPay.Notifications.Domain.Interfaces;
 
 namespace OdixPay.Notifications.API.Filters;
 
 public class AuthorizeRoleFilter() : Attribute, IAsyncAuthorizationFilter
 {
-
     public string Permission { get; set; } = string.Empty;
 
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -17,14 +18,20 @@ public class AuthorizeRoleFilter() : Attribute, IAsyncAuthorizationFilter
 
         ArgumentNullException.ThrowIfNull(context);
 
-        var _authService = context.HttpContext.RequestServices.GetRequiredService<IAuthenticationService>() ?? throw new InvalidOperationException("Authentication service is not registered.");
+        var _authService = context.HttpContext.RequestServices.GetRequiredService<IAuthenticationService>() 
+            ?? throw new InvalidOperationException("Authentication service is not registered.");
 
-        var _logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<AuthorizeRoleFilter>>() ?? throw new InvalidOperationException("Logger service is not registered.");
+        var _logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<AuthorizeRoleFilter>>() 
+            ?? throw new InvalidOperationException("Logger service is not registered.");
+
+        var _IStringLocalizer = context.HttpContext.RequestServices.GetRequiredService<IStringLocalizer<SharedResource>>()
+            ?? throw new InvalidOperationException("Localizer service is not registered.");
+
 
         var user = context.HttpContext.User;
         if (!user.Identity?.IsAuthenticated ?? true)
         {
-            context.Result = CreateUnauthorizedResult("User is not authenticated");
+            context.Result = CreateUnauthorizedResult(_IStringLocalizer["UserNotAuthenticated"]);
             return;
         }
 
@@ -32,7 +39,7 @@ public class AuthorizeRoleFilter() : Attribute, IAsyncAuthorizationFilter
 
         if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
         {
-            context.Result = CreateUnauthorizedResult("User ID claim is missing or empty");
+            context.Result = CreateUnauthorizedResult(_IStringLocalizer["UserIDClaimIsMissingOrEmpty"]);
             return;
         }
 
@@ -40,13 +47,13 @@ public class AuthorizeRoleFilter() : Attribute, IAsyncAuthorizationFilter
 
         if (string.IsNullOrEmpty(userRoleId))
         {
-            context.Result = CreateUnauthorizedResult("User role claim is missing or empty");
+            context.Result = CreateUnauthorizedResult(_IStringLocalizer["UserIDClaimIsMissingOrEmpty"]);
             return;
         }
 
         if (string.IsNullOrEmpty(Permission))
         {
-            context.Result = CreateBadRequestResult("Permission must be specified in AuthorizeRoleFilter");
+            context.Result = CreateBadRequestResult(_IStringLocalizer["PermissionMustBeSpecifiedInAuthorizeRoleFilter"]);
             return;
         }
 
@@ -59,7 +66,7 @@ public class AuthorizeRoleFilter() : Attribute, IAsyncAuthorizationFilter
         {
             _logger.LogWarning("Authorization failed for user {UserId} with permission {Permission}: {ErrorMessage}",
                 userIdClaim.Value, Permission, authResult.ErrorMessage);
-            context.Result = CreateForbiddenResult(authResult.ErrorMessage ?? "User is not authorized for the requested action");
+            context.Result = CreateForbiddenResult(authResult.ErrorMessage ?? _IStringLocalizer["UserIsNotAuthorizedForTheRequestedAction"]);
             return;
         }
 

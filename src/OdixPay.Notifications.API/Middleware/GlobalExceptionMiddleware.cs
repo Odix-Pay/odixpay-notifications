@@ -1,13 +1,26 @@
+using Microsoft.Extensions.Localization;
 using OdixPay.Notifications.API.Constants;
 using OdixPay.Notifications.API.Models.Response;
 using OdixPay.Notifications.Application.Exceptions;
+using OdixPay.Notifications.Contracts.Resources.LocalizationResources;
 
 namespace OdixPay.Notifications.API.Middleware;
 
-public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
+public class GlobalExceptionMiddleware
 {
-    private readonly RequestDelegate _next = next ?? throw new ArgumentException(nameof(next));
-    private readonly ILogger<GlobalExceptionMiddleware> _logger = logger ?? throw new ArgumentException(nameof(logger));
+    private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionMiddleware> _logger;
+    private readonly IStringLocalizer<SharedResource> _IStringLocalizer;
+
+    // Middleware constructor — dependencies injected by ASP.NET Core
+    public GlobalExceptionMiddleware( RequestDelegate next,
+                                      ILogger<GlobalExceptionMiddleware> logger,
+                                      IStringLocalizer<SharedResource> IStringLocalizer)
+    {
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _IStringLocalizer = IStringLocalizer;
+    }
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -18,7 +31,7 @@ public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExcep
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception occurred");
+            _logger.LogError(ex, _IStringLocalizer["UnhandledExceptionOccurred"]);
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -27,7 +40,7 @@ public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExcep
     {
         int statusCode = HttpStatusCodes.InternalServerError;
         object? errorPayload = null;
-        string message = "An unexpected error occurred";
+        string message = _IStringLocalizer["AnUnexpectedErrorOccurred"];
 
         if (ex is AppException appEx)
         {

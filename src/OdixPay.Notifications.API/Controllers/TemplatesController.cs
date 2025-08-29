@@ -2,12 +2,12 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OdixPay.Notifications.API.Constants;
-using OdixPay.Notifications.API.Models.Response;
 using OdixPay.Notifications.Application.Commands;
 using OdixPay.Notifications.Application.Queries;
 using OdixPay.Notifications.Domain.DTO.Requests;
-using OdixPay.Notifications.Domain.DTO.Responses;
 using OdixPay.Notifications.API.Filters;
+using Microsoft.Extensions.Localization;
+using OdixPay.Notifications.Contracts.Resources.LocalizationResources;
 
 namespace OdixPay.Notifications.API.Controllers;
 
@@ -15,9 +15,16 @@ namespace OdixPay.Notifications.API.Controllers;
 [ApiController]
 [ApiVersion(ApiConstants.APIVersion.VersionString)]
 [Authorize(AuthenticationSchemes = ApiConstants.Authentication.CustomAuthScheme)]
-public class TemplatesController(IMediator mediator) : BaseController
+public class TemplatesController : BaseController
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IMediator _mediator;
+    private readonly IStringLocalizer<SharedResource> _IStringLocalizer;
+    public TemplatesController(IMediator mediator,
+                                    IStringLocalizer<SharedResource> IStringLocalizer) : base(IStringLocalizer)
+    {
+        _mediator = mediator;
+        _IStringLocalizer = IStringLocalizer;
+    }
 
     [HttpPost]
     [AuthorizeRoleFilter(Permission = Permissions.Template.Create)]

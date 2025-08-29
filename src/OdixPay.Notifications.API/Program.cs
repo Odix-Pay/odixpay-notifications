@@ -7,38 +7,42 @@ using OdixPay.Notifications.API.Models.Response;
 using OdixPay.Notifications.Application.DependencyInjection;
 using OdixPay.Notifications.Infrastructure.DependencyInjection;
 using OdixPay.Notifications.API.Auth;
+using OdixPay.Notifications.API.Filters;
+using System.Text.Json.Serialization;
+using OdixPay.Notifications.Contracts.Resources.LocalizationResources;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Load CORS settings from configuration.
-var allowedOrigins = builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>() ?? [];
-string corsPolicyName = "AllowSpecificOrigins";
+// ----------------------
+//  Localization Setup
+// ----------------------
+builder.Services.AddLocalization();
 
 
-// Configure CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(corsPolicyName, policy =>
-    {
-        policy.WithOrigins(allowedOrigins ?? [])
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
-});
+// ----------------------
+//  Add Services
+// ----------------------
 
+// ------------------------------------------
 // Configure Authorization
 // Add authorization with global policy
 // Add Authorization without fallback policy
+//-------------------------------------------
 builder.Services.AddAuthorizationBuilder();
 
+// ------------------------------------------
 // Configure Authentication
+// ------------------------------------------
 builder.Services.AddAuthentication(ApiConstants.Authentication.CustomAuthScheme)
     .AddScheme<AuthenticationSchemeOptions, CustomAuthHandler>(ApiConstants.Authentication.CustomAuthScheme, null);
 
-
+// ------------------------------------------
 // Add services to the container.
 // Add layer services
+// ------------------------------------------
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration).AddApiVersioning(options =>
     {
@@ -76,18 +80,36 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         return objectResult;
     };
 });
-
-// Add controllers and OpenAPI support
-builder.Services.AddControllers();
+//-----------------------------------------
+// Controllers
+//-----------------------------------------
+    builder.Services.AddControllers(options =>
+    {
+        options.Filters.Add<ValidateModelAttribute>(); // global model validation
+    })
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        })
+        .AddDataAnnotationsLocalization(options =>
+        {
+            options.DataAnnotationLocalizerProvider = (type, factory) =>
+                factory.Create(typeof(SharedResource)); // marker class
+        });
+//--------------------------------------------
+// Open API / Swagger Configuration
+//--------------------------------------------
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
 
-// CORS middleware
-app.UseCors(corsPolicyName);
 
+
+// --------------------------------
+//  HTTP Configuration and Pipeline
+// --------------------------------
 
 // Configure the HTTP request pipeline
 // Apply middlewares except for webhook endpoints
@@ -99,17 +121,54 @@ app.UseWhen(context => !context.Request.Path.StartsWithSegments($"/api/{ApiConst
     app.UseStandardResponse();
 });
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+
+// ----------------------
+//  Request Localization
+// ----------------------
+var supportedCultures = new[] { "en", "ar", "ur", "tr", "fa" };
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en"),
+    SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList(),
+    SupportedUICultures = supportedCultures.Select(c => new CultureInfo(c)).ToList()
+};
+localizationOptions.RequestCultureProviders.Insert(0, new AcceptLanguageHeaderRequestCultureProvider());
+
+app.UseRequestLocalization(localizationOptions);
+
+
+//---------------------------------------------------
+// Security & CORS Policy and Configuration
+//----------------------------------------------------
+
+var allowedOrigins = builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>() ?? [];
+string corsPolicyName = "AllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicyName, policy =>
+    {
+        policy.WithOrigins(allowedOrigins ?? [])
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
+
+app.UseCors(corsPolicyName);
+
+
+// ----------------------
+//  Routing & Middleware
+// ----------------------
 app.UseHttpsRedirection();
-
 app.UseGlobalExceptionHandling();
-
 app.MapControllers();
 
 app.Run();

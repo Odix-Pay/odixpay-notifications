@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AnErrorOccurred" xml:space="preserve">
+    <value>حدث خطأ.</value>
+  </data>
+  <data name="AnUnexpectedErrorOccurred" xml:space="preserve">
+    <value>حدث خطأ غير متوقع.</value>
+  </data>
+  <data name="AnUnexpectedErrorOccurredWithDetails" xml:space="preserve">
+    <value>حدث خطأ غير متوقع: {0}</value>
+  </data>
+  <data name="BadRequest" xml:space="preserve">
+    <value>طلب غير صالح.</value>
+  </data>
+  <data name="CreateNotificationRequestCannotBeNull" xml:space="preserve">
+    <value>طلب إنشاء الإشعار لا يمكن أن يكون فارغًا.</value>
+  </data>
+  <data name="FailedToSendNotification" xml:space="preserve">
+    <value>فشل في إرسال الإشعار.</value>
+  </data>
+  <data name="IdIsRequired" xml:space="preserve">
+    <value>المعرف مطلوب.</value>
+  </data>
+  <data name="InternalServerError" xml:space="preserve">
+    <value>خطأ داخلي في الخادم.</value>
+  </data>
+  <data name="InvalidEmailRecipientProvided" xml:space="preserve">
+    <value>تم تقديم مستلم بريد إلكتروني غير صالح.</value>
+  </data>
+  <data name="InvalidPushRecipientProvided" xml:space="preserve">
+    <value>تم تقديم مستلم دفع غير صالح.</value>
+  </data>
+  <data name="InvalidSMSRecipientProvided" xml:space="preserve">
+    <value>تم تقديم مستلم رسالة نصية غير صالح.</value>
+  </data>
+  <data name="InvalidTemplateVariablesProvided" xml:space="preserve">
+    <value>تم توفير متغيرات قالب غير صالحة.</value>
+  </data>
+  <data name="InvalidValueForTheGivenType" xml:space="preserve">
+    <value>قيمة غير صالحة لنوع البيانات المحدد.</value>
+  </data>
+  <data name="NotificationIdCannotBeEmpty" xml:space="preserve">
+    <value>معرّف الإشعار لا يمكن أن يكون فارغًا.</value>
+  </data>
+  <data name="NotificationRecipientNotFound" xml:space="preserve">
+    <value>لم يتم العثور على مستلم الإشعار.</value>
+  </data>
+  <data name="NotificationTemplateNotFound" xml:space="preserve">
+    <value>لم يتم العثور على قالب الإشعار.</value>
+  </data>
+  <data name="OperationCompletedSuccessfully" xml:space="preserve">
+    <value>اكتملت العملية بنجاح.</value>
+  </data>
+  <data name="PermissionMustBeSpecifiedInAuthorizeRoleFilter" xml:space="preserve">
+    <value>يجب تحديد الإذن في عامل تصفية AuthorizeRole</value>
+  </data>
+  <data name="ResourceCreatedSuccessfully" xml:space="preserve">
+    <value>تم إنشاء المورد بنجاح.</value>
+  </data>
+  <data name="ResourceNotFound" xml:space="preserve">
+    <value>المورد غير موجود.</value>
+  </data>
+  <data name="TemplateInUseCannotBeDeleted" xml:space="preserve">
+    <value>القالب بالمعرّف '{0}' قيد الاستخدام حاليًا ولا يمكن حذفه.</value>
+  </data>
+  <data name="TemplateVariablesDoNotMatch" xml:space="preserve">
+    <value>متغيرات القالب غير متطابقة.</value>
+  </data>
+  <data name="TemplateWithIdNotFound" xml:space="preserve">
+    <value>لم يتم العثور على القالب بالمعرّف '{0}'.</value>
+  </data>
+  <data name="TemplateWithNameAlreadyExisit" xml:space="preserve">
+    <value>القالب بالاسم '{0}' موجود بالفعل.</value>
+  </data>
+  <data name="TemplateWithNameAlreadyExists" xml:space="preserve">
+    <value>القالب بالاسم '{0}' موجود بالفعل.</value>
+  </data>
+  <data name="TheRequestedResourceWasNotFound" xml:space="preserve">
+    <value>المورد المطلوب غير موجود.</value>
+  </data>
+  <data name="UnhandledExceptionOccurred" xml:space="preserve">
+    <value>حدث استثناء غير معالج.</value>
+  </data>
+  <data name="UserAlreadyHasATokenSetForThisType" xml:space="preserve">
+    <value>لدى المستخدم بالفعل رمز مخصص لهذا النوع.</value>
+  </data>
+  <data name="UserIdCannotBeNullOrEmpty" xml:space="preserve">
+    <value>لا يمكن أن يكون معرف المستخدم فارغًا أو معدومًا.</value>
+  </data>
+  <data name="UserIDClaimIsMissingOrEmpty" xml:space="preserve">
+    <value>المطالبة بمعرّف المستخدم مفقودة أو فارغة</value>
+  </data>
+  <data name="UserIdIsRequired" xml:space="preserve">
+    <value>معرف المستخدم مطلوب.</value>
+  </data>
+  <data name="UserIDNotFoundInClaims" xml:space="preserve">
+    <value>معرف المستخدم غير موجود في المطالبات.</value>
+  </data>
+  <data name="UserIsNotAuthorizedForTheRequestedAction" xml:space="preserve">
+    <value>المستخدم غير مخوّل للإجراء المطلوب</value>
+  </data>
+  <data name="UserNotAuthenticated" xml:space="preserve">
+    <value>المستخدم غير مصادق</value>
+  </data>
+  <data name="UserRequestCannotBeNullOrEmpty" xml:space="preserve">
+    <value>لا يمكن أن يكون طلب المستخدم فارغًا أو معدومًا.</value>
+  </data>
+  <data name="UserRoleClaimIsMissingOrEmpty" xml:space="preserve">
+    <value>المطالبة بدور المستخدم مفقودة أو فارغة</value>
+  </data>
+</root>

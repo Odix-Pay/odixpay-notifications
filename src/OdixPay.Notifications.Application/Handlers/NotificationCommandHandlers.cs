@@ -1,10 +1,12 @@
 using System.Text.Json;
 using AutoMapper;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OdixPay.Notifications.Application.Commands;
 using OdixPay.Notifications.Application.Exceptions;
 using OdixPay.Notifications.Application.UseCases;
+using OdixPay.Notifications.Contracts.Resources.LocalizationResources;
 using OdixPay.Notifications.Domain.DTO.Requests;
 using OdixPay.Notifications.Domain.Entities;
 using OdixPay.Notifications.Domain.Enums;
@@ -13,16 +15,38 @@ using OdixPay.Notifications.Domain.Utils;
 
 namespace OdixPay.Notifications.Application.Handlers;
 
-public class CreateNotificationHandler(INotificationRepository notificationRepository, ValidateTemplateVariables validateTemplateVariables, ILogger<CreateNotificationHandler> logger, INotificationRecipientRepository notificationRecipientRepository, ITemplateEngine templateEngine, INotificationTemplateRepository notificationTemplateRepository, IMapper mapper) : IRequestHandler<CreateNotificationCommand, NotificationResponse>
+public class CreateNotificationHandler : IRequestHandler<CreateNotificationCommand, NotificationResponse>
 {
-    private readonly INotificationRepository _notificationRepository = notificationRepository;
-    private readonly ValidateTemplateVariables _validateTemplateVariables = validateTemplateVariables ?? throw new ArgumentNullException(nameof(validateTemplateVariables));
-    private readonly ILogger<CreateNotificationHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly IMapper _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-    private readonly INotificationRecipientRepository _notificationRecipientRepo = notificationRecipientRepository ?? throw new ArgumentNullException(nameof(notificationRecipientRepository));
+    private readonly INotificationRepository _notificationRepository;
+    private readonly ValidateTemplateVariables _validateTemplateVariables;
+    private readonly ILogger<CreateNotificationHandler> _logger;
+    private readonly INotificationRecipientRepository _notificationRecipientRepo;
+    private readonly ITemplateEngine _templateEngine;
+    private readonly INotificationTemplateRepository _notificationTemplateRepository;
+    private readonly IMapper _mapper;
+    private readonly IStringLocalizer<SharedResource> _IStringLocalizer;
 
-    private readonly ITemplateEngine _templateEngine = templateEngine ?? throw new ArgumentNullException(nameof(templateEngine));
-    private readonly INotificationTemplateRepository _notificationTemplateRepository = notificationTemplateRepository ?? throw new ArgumentNullException(nameof(notificationTemplateRepository));
+
+    public CreateNotificationHandler(
+        INotificationRepository notificationRepository,
+        ValidateTemplateVariables validateTemplateVariables,
+        ILogger<CreateNotificationHandler> logger,
+        INotificationRecipientRepository notificationRecipientRepository,
+        ITemplateEngine templateEngine,
+        INotificationTemplateRepository notificationTemplateRepository,
+        IMapper mapper,
+        IStringLocalizer<SharedResource> StringLocalizer)
+        {
+            _notificationRepository = notificationRepository ?? throw new ArgumentNullException(nameof(notificationRepository));
+            _validateTemplateVariables = validateTemplateVariables ?? throw new ArgumentNullException(nameof(validateTemplateVariables));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _notificationRecipientRepo = notificationRecipientRepository ?? throw new ArgumentNullException(nameof(notificationRecipientRepository));
+            _templateEngine = templateEngine ?? throw new ArgumentNullException(nameof(templateEngine));
+            _notificationTemplateRepository = notificationTemplateRepository ?? throw new ArgumentNullException(nameof(notificationTemplateRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _IStringLocalizer = StringLocalizer;
+        }
+
 
     public async Task<NotificationResponse> Handle(CreateNotificationCommand request, CancellationToken cancellationToken)
     {
@@ -85,7 +109,8 @@ public class CreateNotificationHandler(INotificationRepository notificationRepos
 
                 if (template == null)
                 {
-                    throw new NotFoundException("Notification template not found.");
+                   
+                    throw new NotFoundException(_IStringLocalizer["NotificationTemplateNotFound"]?.Value);
                 }
 
                 _logger.LogInformation("Using template {TemplateId} for notification", template.Id);
@@ -115,7 +140,7 @@ public class CreateNotificationHandler(INotificationRepository notificationRepos
                     Variables = request.TemplateVariables
                 }, cancellationToken))
                 {
-                    throw new BadRequestException("Template variables do not match the required format or are missing required fields.");
+                    throw new BadRequestException(_IStringLocalizer["TemplateVariablesDoNotMatch"]?.Value);
                 }
 
                 _logger.LogInformation("Template variables validated successfully for template {TemplateId}", request.TemplateId);
@@ -140,7 +165,7 @@ public class CreateNotificationHandler(INotificationRepository notificationRepos
             {
                 // Log the error and rethrow
                 _logger.LogError("Error validating template variables: {Message}", ex.Message);
-                throw new BadRequestException("Invalid template variables provided.");
+                throw new BadRequestException(_IStringLocalizer["InvalidTemplateVariablesProvided"]?.Value);
             }
         }
 
@@ -156,37 +181,39 @@ public class CreateNotificationHandler(INotificationRepository notificationRepos
         return _mapper.Map<NotificationResponse>(created);
     }
 
-    private static void ValidateEmailRecipient(string? recipient)
+    private  void ValidateEmailRecipient(string? recipient)
     {
         if (!Utils.IsValidEmail(recipient))
         {
-            throw new BadRequestException("Invalid email recipient provided.");
+            throw new BadRequestException(_IStringLocalizer["InvalidEmailRecipientProvided"]?.Value);
         }
     }
 
-    private static void ValidatePushRecipient(string? recipient)
+    private  void ValidatePushRecipient(string? recipient)
     {
         if (!Utils.IsValidPushNotificationToken(recipient))
         {
-            throw new BadRequestException("Invalid push recipient provided.");
+            throw new BadRequestException(_IStringLocalizer["InvalidPushRecipientProvided"]?.Value);
         }
     }
 
-    private static void ValidateSmsRecipient(string? recipient)
+    private void ValidateSmsRecipient(string? recipient)
     {
         if (!Utils.IsValidPhoneNumber(recipient))
         {
-            throw new BadRequestException("Invalid SMS recipient provided.");
+            throw new BadRequestException(_IStringLocalizer["InvalidSMSRecipientProvided"]?.Value);
         }
     }
 }
 
 public class SendNotificationHandler(
     INotificationRepository notificationRepository,
-    INotificationService notificationService) : IRequestHandler<SendNotificationCommand, bool>
+    INotificationService notificationService,
+    IStringLocalizer<SharedResource> stringLocalizer) : IRequestHandler<SendNotificationCommand, bool>
 {
     private readonly INotificationRepository _notificationRepository = notificationRepository;
     private readonly INotificationService _notificationService = notificationService;
+    private readonly IStringLocalizer<SharedResource> _IStringLocalizer = stringLocalizer;
 
     public async Task<bool> Handle(SendNotificationCommand request, CancellationToken cancellationToken)
     {
@@ -212,7 +239,7 @@ public class SendNotificationHandler(
             await _notificationRepository.UpdateNotificationStatusAsync(
                 notification.Id,
                 NotificationStatus.Failed,
-                "Failed to send notification", cancellationToken);
+                _IStringLocalizer["FailedToSendNotification"]?.Value, cancellationToken);
         }
 
         return success.Success;

@@ -1,16 +1,30 @@
 using MediatR;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OdixPay.Notifications.Application.Commands;
 using OdixPay.Notifications.Application.Exceptions;
+using OdixPay.Notifications.Contracts.Resources.LocalizationResources;
 using OdixPay.Notifications.Domain.DTO.Requests;
 using OdixPay.Notifications.Domain.Interfaces;
 
 namespace OdixPay.Notifications.Application.Handlers.MessageBrokerEvents;
 
-public class NotificationCreatedCommandHandler(IMediator mediator, ILogger<NotificationCreatedCommandHandler> logger) : INotificationCommandHandler
+public class NotificationCreatedCommandHandler : INotificationCommandHandler
 {
-    private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-    private readonly ILogger<NotificationCreatedCommandHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IMediator _mediator;
+    private readonly ILogger<NotificationCreatedCommandHandler> _logger;
+    private readonly IStringLocalizer<SharedResource> _IStringLocalizer;
+
+
+    public NotificationCreatedCommandHandler(
+        IMediator mediator,
+        ILogger<NotificationCreatedCommandHandler> logger,
+        IStringLocalizer<SharedResource> StringLocalizer)
+    {
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _IStringLocalizer = StringLocalizer;
+    }
 
     public async Task<NotificationResponse> HandleCreateNotificationAsync(CreateNotificationRequest request)
     {
@@ -18,7 +32,7 @@ public class NotificationCreatedCommandHandler(IMediator mediator, ILogger<Notif
         if (request == null)
         {
             _logger.LogError("CreateNotificationRequest is null.");
-            throw new ArgumentNullException(nameof(request), "CreateNotificationRequest cannot be null.");
+            throw new ArgumentNullException(nameof(request),_IStringLocalizer["CreateNotificationRequestCannotBeNull"]);
         }
 
         var command = new CreateNotificationCommand
@@ -47,7 +61,7 @@ public class NotificationCreatedCommandHandler(IMediator mediator, ILogger<Notif
         if (notificationId == Guid.Empty)
         {
             _logger.LogError("NotificationId is empty.");
-            throw new BadRequestException("NotificationId cannot be empty.");
+            throw new BadRequestException(_IStringLocalizer["NotificationIdCannotBeEmpty"]);
         }
 
         try

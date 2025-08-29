@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AnErrorOccurred" xml:space="preserve">
+    <value>Bir hata oluştu.</value>
+  </data>
+  <data name="AnUnexpectedErrorOccurred" xml:space="preserve">
+    <value>Beklenmeyen bir hata oluştu.</value>
+  </data>
+  <data name="AnUnexpectedErrorOccurredWithDetails" xml:space="preserve">
+    <value>Beklenmeyen bir hata oluştu: {0}</value>
+  </data>
+  <data name="BadRequest" xml:space="preserve">
+    <value>Geçersiz istek.</value>
+  </data>
+  <data name="CreateNotificationRequestCannotBeNull" xml:space="preserve">
+    <value>Bildirim oluşturma isteği boş olamaz.</value>
+  </data>
+  <data name="FailedToSendNotification" xml:space="preserve">
+    <value>Bildirim gönderilemedi.</value>
+  </data>
+  <data name="IdIsRequired" xml:space="preserve">
+    <value>Kimlik gereklidir.</value>
+  </data>
+  <data name="InternalServerError" xml:space="preserve">
+    <value>Sunucu iç hatası.</value>
+  </data>
+  <data name="InvalidEmailRecipientProvided" xml:space="preserve">
+    <value>Geçersiz e-posta alıcısı sağlandı.</value>
+  </data>
+  <data name="InvalidPushRecipientProvided" xml:space="preserve">
+    <value>Geçersiz push alıcısı sağlandı.</value>
+  </data>
+  <data name="InvalidSMSRecipientProvided" xml:space="preserve">
+    <value>Geçersiz SMS alıcısı sağlandı.</value>
+  </data>
+  <data name="InvalidTemplateVariablesProvided" xml:space="preserve">
+    <value>Geçersiz şablon değişkenleri sağlandı.</value>
+  </data>
+  <data name="InvalidValueForTheGivenType" xml:space="preserve">
+    <value>Verilen tür için geçersiz değer.</value>
+  </data>
+  <data name="NotificationIdCannotBeEmpty" xml:space="preserve">
+    <value>Bildirim kimliği boş olamaz.</value>
+  </data>
+  <data name="NotificationRecipientNotFound" xml:space="preserve">
+    <value>Bildirim alıcısı bulunamadı.</value>
+  </data>
+  <data name="NotificationTemplateNotFound" xml:space="preserve">
+    <value>Bildirim şablonu bulunamadı.</value>
+  </data>
+  <data name="OperationCompletedSuccessfully" xml:space="preserve">
+    <value>İşlem başarıyla tamamlandı.</value>
+  </data>
+  <data name="PermissionMustBeSpecifiedInAuthorizeRoleFilter" xml:space="preserve">
+    <value>AuthorizeRole filtresinde izin belirtilmelidir</value>
+  </data>
+  <data name="ResourceCreatedSuccessfully" xml:space="preserve">
+    <value>Kaynak başarıyla oluşturuldu.</value>
+  </data>
+  <data name="ResourceNotFound" xml:space="preserve">
+    <value>Kaynak bulunamadı.</value>
+  </data>
+  <data name="TemplateInUseCannotBeDeleted" xml:space="preserve">
+    <value>Kimliği '{0}' olan şablon şu anda kullanımda ve silinemez.</value>
+  </data>
+  <data name="TemplateVariablesDoNotMatch" xml:space="preserve">
+    <value>Şablon değişkenleri eşleşmiyor.</value>
+  </data>
+  <data name="TemplateWithIdNotFound" xml:space="preserve">
+    <value>Kimliği '{0}' olan şablon bulunamadı.</value>
+  </data>
+  <data name="TemplateWithNameAlreadyExisit" xml:space="preserve">
+    <value>'{0}' adında bir şablon zaten mevcut.</value>
+  </data>
+  <data name="TemplateWithNameAlreadyExists" xml:space="preserve">
+    <value>'{0}' adında bir şablon zaten mevcut.</value>
+  </data>
+  <data name="TheRequestedResourceWasNotFound" xml:space="preserve">
+    <value>İstenen kaynak bulunamadı.</value>
+  </data>
+  <data name="UnhandledExceptionOccurred" xml:space="preserve">
+    <value>Beklenmeyen bir hata oluştu.</value>
+  </data>
+  <data name="UserAlreadyHasATokenSetForThisType" xml:space="preserve">
+    <value>Kullanıcının bu tür için zaten bir token seti var.</value>
+  </data>
+  <data name="UserIdCannotBeNullOrEmpty" xml:space="preserve">
+    <value>Kullanıcı kimliği boş veya null olamaz.</value>
+  </data>
+  <data name="UserIDClaimIsMissingOrEmpty" xml:space="preserve">
+    <value>Kullanıcı kimliği talebi eksik veya boş</value>
+  </data>
+  <data name="UserIdIsRequired" xml:space="preserve">
+    <value>Kullanıcı kimliği gereklidir.</value>
+  </data>
+  <data name="UserIDNotFoundInClaims" xml:space="preserve">
+    <value>Kullanıcı kimliği taleplerde bulunamadı.</value>
+  </data>
+  <data name="UserIsNotAuthorizedForTheRequestedAction" xml:space="preserve">
+    <value>Kullanıcı istenen işlem için yetkili değil</value>
+  </data>
+  <data name="UserNotAuthenticated" xml:space="preserve">
+    <value>Kullanıcı kimliği doğrulanmamış</value>
+  </data>
+  <data name="UserRequestCannotBeNullOrEmpty" xml:space="preserve">
+    <value>Kullanıcı isteği boş veya null olamaz.</value>
+  </data>
+  <data name="UserRoleClaimIsMissingOrEmpty" xml:space="preserve">
+    <value>Kullanıcı rolü talebi eksik veya boş</value>
+  </data>
+</root>

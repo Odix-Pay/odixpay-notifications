@@ -6,6 +6,8 @@ using OdixPay.Notifications.API.Constants;
 using OdixPay.Notifications.Application.Commands;
 using OdixPay.Notifications.Domain.DTO.Requests;
 using OdixPay.Notifications.API.Filters;
+using Microsoft.Extensions.Localization;
+using OdixPay.Notifications.Contracts.Resources.LocalizationResources;
 
 namespace OdixPay.Notifications.API.Controllers;
 
@@ -13,10 +15,17 @@ namespace OdixPay.Notifications.API.Controllers;
 [ApiController]
 [ApiVersion(ApiConstants.APIVersion.VersionString)]
 [Authorize(AuthenticationSchemes = ApiConstants.Authentication.CustomAuthScheme)]
-public class NotificationRecipientController(IMediator mediator) : BaseController
+public class NotificationRecipientController : BaseController
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IMediator _mediator;
+    private readonly IStringLocalizer<SharedResource> _IStringLocalizer;
 
+    public NotificationRecipientController(IMediator mediator,
+                                    IStringLocalizer<SharedResource> IStringLocalizer) : base(IStringLocalizer)
+    {
+        _mediator = mediator;
+        _IStringLocalizer = IStringLocalizer;
+    }
     [HttpPost]
     public async Task<IActionResult> CreateNotificationRecipient([FromBody] CreateNotificationRecipientRequestDTO request)
     {

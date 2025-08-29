@@ -1,14 +1,25 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.Extensions.Localization;
 using OdixPay.Notifications.API.Constants;
 using OdixPay.Notifications.API.Models.Response;
 using OdixPay.Notifications.Application.Exceptions;
+using OdixPay.Notifications.Contracts.Resources.LocalizationResources;
 
 namespace OdixPay.Notifications.API.Middleware;
 
-public class StandardResponseMiddleware(RequestDelegate next)
+public class StandardResponseMiddleware
 {
-    private readonly RequestDelegate _next = next;
+    private readonly RequestDelegate _next;
+    private readonly IStringLocalizer<SharedResource> _IStringLocalizer;
+
+    
+    public StandardResponseMiddleware(RequestDelegate next,
+                                      IStringLocalizer<SharedResource> IStringLocalizer)
+    {
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _IStringLocalizer = IStringLocalizer;
+    }
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -49,7 +60,7 @@ public class StandardResponseMiddleware(RequestDelegate next)
 
                 var res = StandardResponse<object, object>.Error(
                     ApiConstants.ErrorTypes.NotFound,
-                    "The requested resource was not found."
+                    _IStringLocalizer["TheRequestedResourceWasNotFound"]
                 );
 
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
@@ -84,7 +95,7 @@ public class StandardResponseMiddleware(RequestDelegate next)
             // Prepare the standard response
             object? data = null;
             object? error = null;
-            string? message = "Operation completed successfully";
+            string? message = _IStringLocalizer["OperationCompletedSuccessfully"];
             string status = ApiConstants.Response.SuccessStatus;
 
             if (context.Response.StatusCode >= 400)
@@ -101,12 +112,12 @@ public class StandardResponseMiddleware(RequestDelegate next)
                 try
                 {
                     data = JsonSerializer.Deserialize<object>(responseContent);
-                    message = "Operation completed successfully";
+                    message = _IStringLocalizer["OperationCompletedSuccessfully"];
                 }
                 catch
                 {
                     data = responseContent; // Fallback to raw content if not JSON
-                    message = "Operation completed successfully";
+                    message = _IStringLocalizer["OperationCompletedSuccessfully"]; 
                 }
             }
 
@@ -119,8 +130,8 @@ public class StandardResponseMiddleware(RequestDelegate next)
         }
         catch (Exception ex)
         {
-            object? error = "InternalServerError";
-            string message = $"An unexpected error occurred: {ex.Message}";
+            object? error = _IStringLocalizer["InternalServerError"];
+            string message = _IStringLocalizer["AnUnexpectedErrorOccurredWithDetails"]; 
             int statusCode = (int)HttpStatusCode.InternalServerError;
 
             if (ex is AppException appEx)
@@ -157,7 +168,7 @@ public class StandardResponseMiddleware(RequestDelegate next)
     };
 
     // Gets standard response message to return to server
-    private static AppException GetErrorData(int statusCode, string responseContent)
+    private  AppException GetErrorData(int statusCode, string responseContent)
     {
         if (!string.IsNullOrEmpty(responseContent))
         {
@@ -165,7 +176,7 @@ public class StandardResponseMiddleware(RequestDelegate next)
             {
                 var errorObj = JsonSerializer.Deserialize<object>(responseContent);
 
-                var message = "An error occurred";
+                var message = _IStringLocalizer["AnErrorOccurred"];
 
                 return new AppException(
                     message,
@@ -176,7 +187,7 @@ public class StandardResponseMiddleware(RequestDelegate next)
             catch
             {
                 return new AppException(
-                    message: "An error occured",
+                    message: _IStringLocalizer["AnErrorOccurred"],
                     statusCode,
                     errorData: responseContent
                 ); // Fallback to raw content
@@ -184,7 +195,7 @@ public class StandardResponseMiddleware(RequestDelegate next)
         }
 
         return new AppException(
-            message: "An error occured",
+            message: _IStringLocalizer["AnErrorOccurred"],
             statusCode,
             errorData: null
         );
