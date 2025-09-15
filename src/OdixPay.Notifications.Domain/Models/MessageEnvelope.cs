@@ -6,7 +6,7 @@ namespace OdixPay.Notifications.Domain.Models;
 /// An envelope that holds message (data) to be published to other microservices
 /// </summary>
 /// <typeparam name="T">Dynamic data to be published</typeparam>
-public class MessageEnvelope<T>(T? data)
+public class MessageEnvelope<T>(T? data, Dictionary<string, string>? headers = null)
 {
     [JsonPropertyName("data")]
     public T? Data { get; set; } = data;
@@ -18,5 +18,5 @@ public class MessageEnvelope<T>(T? data)
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
     [JsonPropertyName("headers")]
-    public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
+    public Dictionary<string, string> Headers { get; set; } = headers ?? new ();
 }

@@ -9,6 +9,7 @@ public class NotificationRecipient : BaseEntity
     public NotificationType Type { get; set; } // Defines the token type (Email, SMS, PUSH, etc.)
 
     public string? Name { get; set; }
+    public string? DefaultLanguage { get; set; } = "en";
 }
 
 // NOTE: For simplicity, a single user cannot have multiple notification tokens of the same type.

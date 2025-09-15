@@ -1,12 +1,16 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
-using OdixPay.Notifications.API.Constants;
 using OdixPay.Notifications.API.Middleware;
 using OdixPay.Notifications.API.Models.Response;
 using OdixPay.Notifications.Application.DependencyInjection;
 using OdixPay.Notifications.Infrastructure.DependencyInjection;
 using OdixPay.Notifications.API.Auth;
+using OdixPay.Notifications.Contracts.Constants;
+using OdixPay.Notifications.Contracts.Hubs;
+using Microsoft.AspNetCore.HttpOverrides;
+using OdixPay.Notifications.API.Constants;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,22 +31,34 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Configure forwarded headers (if behind a proxy)
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // You might need to add this if your proxy is not on localhost
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 // Configure Authorization
-// Add authorization with global policy
-// Add Authorization without fallback policy
-builder.Services.AddAuthorizationBuilder();
+// Add authorization with configured custom policies
+builder.Services.AddAuthorizationBuilder().AddPolicy(Permissions.Notification.ReadAdminNotifications, policy =>
+       policy.Requirements.Add(new PermissionRequirement(Permissions.Notification.ReadAdminNotifications)));
 
 // Configure Authentication
-builder.Services.AddAuthentication(ApiConstants.Authentication.CustomAuthScheme)
-    .AddScheme<AuthenticationSchemeOptions, CustomAuthHandler>(ApiConstants.Authentication.CustomAuthScheme, null);
+builder.Services.AddAuthentication(APIConstants.Authentication.CustomAuthScheme)
+    .AddScheme<AuthenticationSchemeOptions, CustomAuthHandler>(APIConstants.Authentication.CustomAuthScheme, null);
 
+// Add Authorization policy
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 // Add services to the container.
 // Add layer services
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration).AddApiVersioning(options =>
     {
-        options.DefaultApiVersion = new ApiVersion(ApiConstants.APIVersion.Version, 0); // Default to v1.0
+        options.DefaultApiVersion = new ApiVersion(APIConstants.APIVersion.Version, 0); // Default to v1.0
         options.AssumeDefaultVersionWhenUnspecified = true; // Use default version if none specified
         options.ApiVersionReader = new UrlSegmentApiVersionReader(); // Read version from URL (e.g., /api/v1)
         options.ReportApiVersions = true; // Include API version in response headers
@@ -70,7 +86,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         var objectResult = new ObjectResult(errorResponse)
         {
             StatusCode = StatusCodes.Status422UnprocessableEntity,
-            ContentTypes = { ApiConstants.Response.ContentType }
+            ContentTypes = { APIConstants.Response.ContentType }
         };
 
         return objectResult;
@@ -82,22 +98,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Enable Memory Cache
+builder.Services.AddMemoryCache();
+
 
 var app = builder.Build();
 
-// CORS middleware
-app.UseCors(corsPolicyName);
+// Use forwarded headers (if behind a proxy) - Should be one of the first middlewares
+app.UseForwardedHeaders();
 
-
-// Configure the HTTP request pipeline
-// Apply middlewares except for webhook endpoints
-app.UseWhen(context => !context.Request.Path.StartsWithSegments($"/api/{ApiConstants.APIVersion.VersionName}/webhooks"), app =>
-{
-    app.UseAuthentication();
-    app.UseAuthorization();
-    // Standard response builder middleware
-    app.UseStandardResponse();
-});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -106,10 +115,29 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// CORS middleware
+app.UseCors(corsPolicyName);
+
+// HTTPS redirection middleware
 app.UseHttpsRedirection();
+
+
+
+// Configure the HTTP request pipeline
+// Apply middlewares except for webhook endpoints
+app.UseWhen(context => !context.Request.Path.StartsWithSegments($"/api/{APIConstants.APIVersion.VersionName}/webhooks"), app =>
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+    // Standard response builder middleware
+    // app.UseStandardResponse();
+});
 
 app.UseGlobalExceptionHandling();
 
 app.MapControllers();
+
+// Map websocket connection hubs (SignalR) - on base url "/"
+app.MapHub<NotificationsHub>($"/api/{APIConstants.APIVersion.VersionName}/hub");
 
 app.Run();

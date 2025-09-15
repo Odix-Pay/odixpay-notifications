@@ -151,4 +151,11 @@ public class NotificationRepository(IConnectionFactory connectionFactory) : INot
         using var connection = _connectionFactory.CreateConnection();
         await connection.ExecuteAsync(StoredProcedures.Notification.MarkAsRead, new { Id = id }, commandType: CommandType.StoredProcedure);
     }
+
+    public async Task MarkAllAsReadAsync(string userIdOrRecipientId, CancellationToken cancellationToken = default)
+    {
+
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(StoredProcedures.Notification.MarkAllAsRead, new { UserIdOrRecipientId = userIdOrRecipientId }, commandType: CommandType.StoredProcedure);
+    }
 }

@@ -7,7 +7,6 @@ using System.Text; // Encode message bodies
 using OdixPay.Notifications.Domain.Interfaces;
 using OdixPay.Notifications.Infrastructure.Configuration;
 using OdixPay.Notifications.Domain.Models;
-using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace OdixPay.Notifications.Infrastructure.Services;
@@ -89,14 +88,14 @@ public class RabbitMQService : IEventBusService
     /// <param name="eventName">Event (queue) to which we want to publish an event.</param>
     /// <param name="data">Data to be published to the event (queue).</param>
     /// <exception cref="ArgumentException">Thrown if eventName is null or empty.</exception>
-    public async void Publish<T>(string? eventName, T data)
+    public async void Publish<T>(string? eventName, T data, Dictionary<string, string>? headers = null)
     {
 
         if (string.IsNullOrEmpty(eventName))
             throw new ArgumentException("Event name cannot be null or empty", nameof(eventName));
 
         // Create event message
-        var eventMessage = new MessageEnvelope<T>(data);
+        var eventMessage = new MessageEnvelope<T>(data, headers);
 
         _logger.LogDebug("Publishing event to queue {Queue}", eventName);
 

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using OdixPay.Notifications.Application.Handlers.MessageBrokerEvents;
 using OdixPay.Notifications.Application.Mappings;
+using OdixPay.Notifications.Application.Services;
 using OdixPay.Notifications.Application.UseCases;
 using OdixPay.Notifications.Domain.Interfaces;
 using System.Reflection;
@@ -19,6 +20,9 @@ public static class ServiceCollectionExtensions
         // Register application use cases
         services.AddScoped<INotificationCommandHandler, NotificationCreatedCommandHandler>();
         services.AddScoped<ValidateTemplateVariables, ValidateTemplateVariables>();
+
+        // Add Template Engine
+        services.AddScoped<ITemplateEngine, TemplateEngine>();
 
 
         return services;

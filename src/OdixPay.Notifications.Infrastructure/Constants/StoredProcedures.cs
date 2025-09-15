@@ -14,6 +14,7 @@ public static class StoredProcedures
         public const string IncrementRetryCount = "notifications.sp_IncrementNotificationRetryCount";
         public const string GetUnreadCount = "notifications.sp_GetUnreadNotificationCount";
         public const string MarkAsRead = "notifications.sp_MarkNotificationAsRead";
+        public const string MarkAllAsRead = "notifications.sp_MarkAllNotificationsAsRead";
         public const string Count = "notifications.sp_GetNotificationCount";
         public const string Query = "notifications.sp_GetNotifications";
     }
@@ -36,6 +37,7 @@ public static class StoredProcedures
         public const string GetById = "notifications.sp_GetNotificationRecipientById";
         public const string GetByUserIdAndType = "notifications.sp_GetNotificationRecipientsByUserIdAndType";
         public const string Update = "notifications.sp_UpdateNotificationRecipient";
+        public const string UpdateLanguage = "notifications.sp_UpdateNotificationRecipientLanguage";
         public const string Delete = "notifications.sp_DeleteNotificationRecipient";
         public const string Query = "notifications.sp_QueryNotificationRecipients";
         public const string Count = "notifications.sp_GetNotificationRecipientsCount";

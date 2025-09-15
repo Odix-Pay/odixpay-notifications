@@ -72,6 +72,9 @@ public class CreateNotificationRecipientRequestDTO : IValidatableObject
     [JsonPropertyName("name")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Name { get; set; }
+
+    [JsonPropertyName("defaultLanguage")]
+    public string? DefaultLanguage { get; set; } = "en";
 }
 
 public class UpdateNotificationRecipientRequestDTO
@@ -89,6 +92,9 @@ public class UpdateNotificationRecipientRequestDTO
     [JsonPropertyName("name")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Name { get; set; }
+
+    [JsonPropertyName("defaultLanguage")]
+    public string? DefaultLanguage { get; set; } = "en";
 }
 
 public class QueryNotificationRecipientsRequestDTO : PaginationQueryParams
@@ -110,6 +116,9 @@ public class QueryNotificationRecipientsRequestDTO : PaginationQueryParams
 
     [JsonPropertyName("isDeleted")]
     public bool? IsDeleted { get; set; }
+
+    [JsonPropertyName("defaultLanguage")]
+    public string? DefaultLanguage { get; set; } = "en";
 }
 
 
@@ -127,5 +136,8 @@ public record NotificationRecipientResponseDTO : BaseEntityResponse
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = "No Name";
+
+    [JsonPropertyName("defaultLanguage")]
+    public string? DefaultLanguage { get; set; } = "en";
 
 }

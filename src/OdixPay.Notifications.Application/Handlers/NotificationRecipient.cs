@@ -2,6 +2,7 @@ using AutoMapper;
 using MediatR;
 using OdixPay.Notifications.Application.Commands;
 using OdixPay.Notifications.Application.Exceptions;
+using OdixPay.Notifications.Contracts.Constants;
 using OdixPay.Notifications.Domain.DTO.Requests;
 using OdixPay.Notifications.Domain.DTO.Responses;
 using OdixPay.Notifications.Domain.Entities;
@@ -10,11 +11,12 @@ using OdixPay.Notifications.Domain.Interfaces;
 
 namespace OdixPay.Notifications.Application.Handlers;
 
-public class CreateNotificationRecipientHandler(INotificationRecipientRepository notificationReceipientRepository, IMapper mapper) : IRequestHandler<CreateNotificationRecipientCommand, NotificationRecipientResponseDTO>
+public class CreateNotificationRecipientHandler(INotificationRecipientRepository notificationReceipientRepository, IMapper mapper, IRealtimeNotifier realtimeNotifier) : IRequestHandler<CreateNotificationRecipientCommand, NotificationRecipientResponseDTO>
 {
 
     private readonly INotificationRecipientRepository _notificationReceipientRepository = notificationReceipientRepository ?? throw new ArgumentNullException(nameof(notificationReceipientRepository));
     private readonly IMapper _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+    private readonly IRealtimeNotifier _realtimeNotifier = realtimeNotifier ?? throw new ArgumentNullException(nameof(realtimeNotifier));
 
     public async Task<NotificationRecipientResponseDTO> Handle(CreateNotificationRecipientCommand request, CancellationToken cancellationToken)
     {
@@ -34,6 +36,7 @@ public class CreateNotificationRecipientHandler(INotificationRecipientRepository
             return _mapper.Map<NotificationRecipientResponseDTO>(existingReceipient);
         }
 
+        System.Console.WriteLine($"Creating new notification recipient for user {request.UserId} of type {request.Type}");
 
         var notificationReceipient = new NotificationRecipient
         {
@@ -45,7 +48,11 @@ public class CreateNotificationRecipientHandler(INotificationRecipientRepository
 
         await _notificationReceipientRepository.AddAsync(notificationReceipient, cancellationToken);
 
-        return _mapper.Map<NotificationRecipientResponseDTO>(notificationReceipient);
+        var receipient = _mapper.Map<NotificationRecipientResponseDTO>(notificationReceipient);
+
+        await _realtimeNotifier.SendToGroupAsync(HubPrefixes.GetGroup(HubPrefixes.Admins, [HubPrefixes.Notifications]), "Notification_Recipient_Created", receipient, cancellationToken);
+
+        return receipient;
     }
 }
 

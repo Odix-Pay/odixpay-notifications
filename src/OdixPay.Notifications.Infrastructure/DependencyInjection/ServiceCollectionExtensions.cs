@@ -10,6 +10,12 @@ using OdixPay.Notifications.Infrastructure.Services.StartupTasks;
 using Microsoft.Extensions.Options;
 using OdixPay.Notifications.Infrastructure.Services.BackgroundTasks;
 using OdixPay.Notifications.Infrastructure.Services.StartupTasks.InterlaceNotifications;
+using OdixPay.Notifications.Infrastructure.Filters;
+using Microsoft.AspNetCore.SignalR;
+using OdixPay.Notifications.Contracts.Interfaces;
+using OdixPay.Notifications.Infrastructure.Services.StartupTasks.TransactionDetectionEvents;
+using OdixPay.Notifications.Infrastructure.Services.StartupTasks.AppSettingsChanged;
+using OdixPay.Notifications.Infrastructure.Services.StartupTasks.RealtimeNotifications;
 
 namespace OdixPay.Notifications.Infrastructure.DependencyInjection;
 
@@ -17,6 +23,13 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        // Constants
+        var RedisConnstring = configuration.GetConnectionString("Redis");
+
+        if (string.IsNullOrEmpty(RedisConnstring))
+        {
+            throw new InvalidOperationException("Redis connection string is not configured. Please set it in the application settings.");
+        }
         // Add Db Configuration
         services.Configure<DbConfig>(configuration.GetSection("DbConfig"));
         services.Configure<RoleServiceHTTPClientConfig>(configuration.GetSection("RoleService"));
@@ -55,9 +68,6 @@ public static class ServiceCollectionExtensions
             client.BaseAddress = new Uri(config.BaseUrl);
             client.Timeout = config.Timeout;
         });
-
-        // Add Template Engine
-        services.AddScoped<ITemplateEngine, TemplateEngine>();
 
         // Add Brevo email service
         services.AddHttpClient<IBrevoClient, BrevoClient>((provider, client) =>
@@ -105,36 +115,51 @@ public static class ServiceCollectionExtensions
         {
 
             Console.WriteLine("Initializing Redis connection...");
-            var configuration = sp.GetRequiredService<IConfiguration>();
-            if (configuration == null)
-            {
-                throw new InvalidOperationException("Configuration is not available. Ensure it is properly set up in the application.");
-            }
-            // Get Redis connection string from configuration
-            var connectionString = configuration.GetConnectionString("Redis")
-                ?? throw new ArgumentNullException("Redis connection string is not configured. Please set it in the application settings.");
 
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                Console.WriteLine("Redis connection string is not configured. Please set it in the application settings.");
-                throw new ArgumentNullException("Redis connection string is not configured. Please set it in the application settings.");
-            }
-
-            Console.WriteLine("Connecting to Redis with connection string: ");
-
-            return ConnectionMultiplexer.Connect(connectionString);
+            return ConnectionMultiplexer.Connect(RedisConnstring);
         });
         services.AddSingleton<IDistributedCacheService, RedisCacheService>();
+
+        // Add SignalR
+        services.AddSignalR(opts =>
+        {
+            opts.EnableDetailedErrors = true;
+            // Add our custom authorization filter to the hub pipeline
+            opts.AddFilter<HubAuthorizationFilter>();
+        }) // Include Redis backplane for SignalR - This enables scaling out to multiple servers (replica sets).
+        .AddStackExchangeRedis(opts =>
+        {
+
+            var cfg = ConfigurationOptions.Parse(RedisConnstring);
+            cfg.AbortOnConnectFail = false;
+            cfg.ConnectRetry = 5;
+            cfg.ReconnectRetryPolicy = new ExponentialRetry(5000);
+            cfg.ClientName = "odixpay-signalr";
+            cfg.DefaultDatabase = 1; // isolate from your app cache (usually DB0)
+
+            // Let SignalR create/own its pub-sub connection:
+            opts.ConnectionFactory = async writer => await ConnectionMultiplexer.ConnectAsync(cfg, writer);
+
+        });
+        // Add realtime notification service
+        services.AddScoped<IRealtimeNotifier, RealtimeNotificationService>();
+        // Realtime hub authorizer
+        services.AddScoped<IHubAuthorizer, HubAuthorizer>();
+
 
         // Register RabbitMQ service
         services.AddSingleton<IEventBusService, RabbitMQService>();
 
         // Startup tasks
+        services.AddHostedService<NotificationProcessorService>();
         services.AddHostedService<InitPublickeys>();
         services.AddHostedService<NotificationProcessorService>();
         services.AddHostedService<Interlace3dSecureOtpSubscriber>();
         services.AddHostedService<Interlace3dsOtpSubscriber>();
         services.AddHostedService<InterlaceNotificationsSubscriber>();
+        services.AddHostedService<SubscribeToScanningEvents>();
+        services.AddHostedService<AppSettingsChangedEventsHandler>();
+        services.AddHostedService<RealtimeNotificationsHandler>();
 
 
         return services;

@@ -15,6 +15,7 @@ public interface INotificationRecipientRepository
     Task AddAsync(NotificationRecipient recipient, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(NotificationRecipient recipient, CancellationToken cancellationToken = default);
+    Task UpdateRecipientLanguageAsync(string recipientId, string language, CancellationToken cancellationToken = default);
 
     Task<(IEnumerable<NotificationRecipient> Recipients, int TotalCount)> QueryAsync(QueryNotificationRecipientsRequestDTO query, CancellationToken cancellationToken = default);
 

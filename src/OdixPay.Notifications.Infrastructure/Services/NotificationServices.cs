@@ -92,6 +92,8 @@ public class NotificationService(
             throw new ArgumentNullException(nameof(notification.Recipient), "Recipient cannot be null for push notifications.");
         }
 
+        System.Console.WriteLine("Sending push notification to: " + notification.Recipient);
+
         var to = notification.Recipient;
         var title = notification.Title ?? "";
         var message = notification.Message ?? "No Message";

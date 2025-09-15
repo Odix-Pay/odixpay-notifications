@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc.Filters;
-using OdixPay.Notifications.Domain.Interfaces;
 
 namespace OdixPay.Notifications.API.Filters;
 

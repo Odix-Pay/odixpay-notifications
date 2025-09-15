@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using OdixPay.Notifications.Domain.Enums;
 using OdixPay.Notifications.Domain.Interfaces;
 using OdixPay.Notifications.Domain.Models;
@@ -8,7 +7,7 @@ using OdixPay.Notifications.Infrastructure.Constants;
 
 namespace OdixPay.Notifications.Infrastructure.Services.StartupTasks.EmailAndPhoneVerifiedEvents;
 
-public class EmailAndPhoneVerifiedEvents(ILogger<EmailAndPhoneVerifiedEvents> logger, IEventBusService eventBusService, IServiceProvider serviceProvider) : IHostedService
+public class EmailAndPhoneVerifiedEvents(IEventBusService eventBusService, IServiceProvider serviceProvider) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {

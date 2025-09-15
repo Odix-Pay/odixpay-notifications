@@ -18,9 +18,7 @@ public class NotificationTemplateRepository(IConnectionFactory connectionFactory
 
         using var connection = _connectionFactory.CreateConnection();
 
-
         template.GenerateSlug(); // Ensure slug is generated before saving
-
 
         var parameters = new
         {
@@ -30,6 +28,7 @@ public class NotificationTemplateRepository(IConnectionFactory connectionFactory
             Type = (int)template.Type,
             template.Subject,
             template.Body,
+            template.Locale,
             template.Variables,
             template.IsActive,
             template.CreatedAt,
@@ -55,30 +54,22 @@ public class NotificationTemplateRepository(IConnectionFactory connectionFactory
         return result;
     }
 
-    public async Task<NotificationTemplate?> GetTemplateByNameAsync(string name, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<NotificationTemplate>> GetTemplatesByNameOrSlugAsync(string nameOrSlug, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        using var connection = _connectionFactory.CreateConnection();
-
-        var result = await connection.QueryFirstOrDefaultAsync<NotificationTemplate>(
-            StoredProcedures.Template.GetBySlug, new { Slug = SlugifyString.Slugify(name) },
-            commandType: CommandType.StoredProcedure);
-
-        return result;
+        return await GetTemplatesAsync(new() { Slug = Slugify(nameOrSlug) }, cancellationToken);
     }
 
-    public async Task<NotificationTemplate?> GetTemplateBySlugAsync(string slug, CancellationToken cancellationToken = default)
+    public async Task<NotificationTemplate?> GetTemplateBySlugAndLocaleAsync(string slug, string locale, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         using var connection = _connectionFactory.CreateConnection();
 
-        var result = await connection.QueryFirstOrDefaultAsync<NotificationTemplate>(
-            StoredProcedures.Template.GetBySlug, new { Slug = SlugifyString.Slugify(slug) },
-            commandType: CommandType.StoredProcedure);
+        var result = await GetTemplatesAsync(new() { Slug = Slugify(slug), Locale = locale }, cancellationToken);
 
-        return result;
+        return result.FirstOrDefault();
     }
 
     public async Task<IEnumerable<NotificationTemplate>> GetActiveTemplatesAsync(int Page = 1, int Limit = 20, CancellationToken cancellationToken = default)
@@ -120,6 +111,11 @@ public class NotificationTemplateRepository(IConnectionFactory connectionFactory
 
         using var connection = _connectionFactory.CreateConnection();
 
+        if (template.Slug != Slugify(template.Name))
+        {
+            template.GenerateSlug();
+        }
+
         var parameters = new
         {
             template.Id,
@@ -128,6 +124,7 @@ public class NotificationTemplateRepository(IConnectionFactory connectionFactory
             Type = (int)template.Type,
             template.Subject,
             template.Body,
+            template.Locale,
             template.Variables,
             template.IsActive,
             template.IsDeleted,
@@ -166,7 +163,7 @@ public class NotificationTemplateRepository(IConnectionFactory connectionFactory
             query.Subject,
             query.Slug,
             query.Search,
-
+            query.Locale
         };
 
         var result = await connection.QuerySingleAsync<int>(
@@ -189,6 +186,7 @@ public class NotificationTemplateRepository(IConnectionFactory connectionFactory
             query.Subject,
             query.Slug,
             query.Search,
+            query.Locale,
             query.Page,
             query.Limit
         };
@@ -198,5 +196,7 @@ public class NotificationTemplateRepository(IConnectionFactory connectionFactory
 
         return result;
     }
+
+    private static string Slugify(string value) => SlugifyString.Slugify(value);
 
 }

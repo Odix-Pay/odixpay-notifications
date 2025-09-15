@@ -6,6 +6,7 @@ public static class Permissions
     {
         public const string Create = "NOTIFICATION_WRITE";
         public const string Read = "NOTIFICATION_READ";
+        public const string ReadAdminNotifications = "ADMIN_NOTIFICATION_READ";
         public const string Update = "NOTIFICATION_UPDATE";
         public const string Delete = "NOTIFICATION_DELETE";
     }

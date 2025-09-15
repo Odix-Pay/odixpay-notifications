@@ -11,7 +11,7 @@ public interface IEventBusService : IDisposable, IAsyncDisposable
     /// <typeparam name="T">Type of the event data</typeparam>
     /// <param name="eventName">Name of the event</param>
     /// <param name="message">Event data to publish</param>
-    void Publish<T>(string eventName, T message);
+    void Publish<T>(string eventName, T message, Dictionary<string, string>? headers = null);
 
     /// <summary>
     /// Subscribes to events from RabbitMQ asynchronously.

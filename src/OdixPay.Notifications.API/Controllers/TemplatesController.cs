@@ -2,19 +2,18 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OdixPay.Notifications.API.Constants;
-using OdixPay.Notifications.API.Models.Response;
 using OdixPay.Notifications.Application.Commands;
 using OdixPay.Notifications.Application.Queries;
 using OdixPay.Notifications.Domain.DTO.Requests;
-using OdixPay.Notifications.Domain.DTO.Responses;
 using OdixPay.Notifications.API.Filters;
+using OdixPay.Notifications.Contracts.Constants;
 
 namespace OdixPay.Notifications.API.Controllers;
 
-[Route($"{ApiConstants.APIVersion.VersionRouteName}/notification-templates")]
+[Route($"{APIConstants.APIVersion.VersionRouteName}/notification-templates")]
 [ApiController]
-[ApiVersion(ApiConstants.APIVersion.VersionString)]
-[Authorize(AuthenticationSchemes = ApiConstants.Authentication.CustomAuthScheme)]
+[ApiVersion(APIConstants.APIVersion.VersionString)]
+[Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
 public class TemplatesController(IMediator mediator) : BaseController
 {
     private readonly IMediator _mediator = mediator;

@@ -121,7 +121,7 @@ BEGIN
     
     SELECT *
     FROM notifications.TBL_Notifications
-    WHERE [Status] = 1 -- Pending
+    WHERE ([Status] = 1 OR [Status] = 4) -- Gets both pending and failed
         AND (ScheduledAt IS NULL OR ScheduledAt <= GETUTCDATE())
         AND RetryCount < MaxRetries
     ORDER BY Priority DESC, CreatedAt ASC --gets higher priority first
@@ -220,6 +220,18 @@ BEGIN
     UPDATE notifications.TBL_Notifications
     SET IsRead = 1
     WHERE Id = @Id;
+END
+GO
+
+CREATE OR ALTER PROCEDURE notifications.sp_MarkAllNotificationsAsRead
+    @UserIdOrRecipientId NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE notifications.TBL_Notifications
+    SET IsRead = 1
+    WHERE UserId = @UserIdOrRecipientId OR Recipient = @UserIdOrRecipientId;
 END
 GO
 

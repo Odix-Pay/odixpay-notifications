@@ -2,6 +2,7 @@ using System.Text.Json;
 using AutoMapper;
 using MediatR;
 using OdixPay.Notifications.Application.Queries;
+using OdixPay.Notifications.Domain.Constants;
 using OdixPay.Notifications.Domain.DTO.Requests;
 using OdixPay.Notifications.Domain.DTO.Responses;
 using OdixPay.Notifications.Domain.Interfaces;
@@ -30,7 +31,7 @@ public class GetTemplateByNameHandler(INotificationTemplateRepository templateRe
 
     public async Task<TemplateResponse?> Handle(GetTemplateByNameQuery request, CancellationToken cancellationToken)
     {
-        var template = await _templateRepository.GetTemplateByNameAsync(request.Name, cancellationToken);
+        var template = await _templateRepository.GetTemplateBySlugAndLocaleAsync(request.Name, request.Locale ?? NotificationConstants.DefaultLocale, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
         if (template == null)
             return null;

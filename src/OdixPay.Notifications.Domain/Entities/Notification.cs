@@ -21,11 +21,13 @@ public class Notification : BaseEntity
     public int RetryCount { get; set; }
     public int MaxRetries { get; set; }
     public string? ExternalId { get; set; }
+    public string? DefaultLocale { get; set; } = "en";  // Default to English
 
     public bool IsRead { get; set; } = false;
 
     // Template-related properties
     public Guid? TemplateId { get; set; }  // Reference to template
+    public string? TemplateSlug { get; set; }  // Slug for template
     public string? TemplateVariables { get; set; }  // JSON with variable values for template
 }
 

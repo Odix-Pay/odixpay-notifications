@@ -1,6 +1,8 @@
+using System.Text.Json;
 using AutoMapper;
 using MediatR;
 using OdixPay.Notifications.Application.Queries;
+using OdixPay.Notifications.Domain.Constants;
 using OdixPay.Notifications.Domain.DTO.Requests;
 using OdixPay.Notifications.Domain.Interfaces;
 
@@ -16,6 +18,8 @@ public class GetNotificationByIdHandler(INotificationRepository notificationRepo
         var notification = await _notificationRepository.GetNotificationByIdAsync(request.Id, cancellationToken);
         if (notification == null)
             return null;
+
+        notification.DefaultLocale = request.Locale ?? notification.DefaultLocale ?? NotificationConstants.DefaultLocale;
 
         return _mapper.Map<NotificationResponse>(notification);
     }
@@ -39,11 +43,9 @@ public class GetNotificationsByUserIdHandler(INotificationRepository notificatio
 
         var notifications = await _notificationRepository.GetNotificationsAsync(request, cancellationToken);
 
-        var notificationResponses = notifications.Select(n => _mapper.Map<NotificationResponse>(n));
-
         return new NotificationListResponse
         {
-            Data = notificationResponses,
+            Data = _mapper.Map<List<NotificationResponse>>(notifications),
             Limit = Limit,
             Page = Page,
             Total = count

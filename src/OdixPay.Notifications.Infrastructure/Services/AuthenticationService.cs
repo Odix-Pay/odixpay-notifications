@@ -70,6 +70,7 @@ public class AuthenticationService(
             }
 
             return AuthorizationResult.Success();
+
         }
         catch (Exception)
         {

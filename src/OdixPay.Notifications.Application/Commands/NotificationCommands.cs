@@ -1,4 +1,5 @@
 using MediatR;
+using OdixPay.Notifications.Domain.Constants;
 using OdixPay.Notifications.Domain.DTO.Requests;
 
 namespace OdixPay.Notifications.Application.Commands;
@@ -7,14 +8,20 @@ public class CreateNotificationCommand : CreateNotificationRequest, IRequest<Not
 {
 }
 
-public class SendNotificationCommand(Guid notificationId) : IRequest<bool>
+public class SendNotificationCommand(Guid notificationId, string locale = NotificationConstants.DefaultLocale) : IRequest<bool>
 {
     public Guid NotificationId { get; set; } = notificationId;
+    public string Locale { get; set; } = locale;
 }
 
 public class MarkNotificationAsReadCommand(Guid notificationId) : IRequest<bool>
 {
     public Guid NotificationId { get; set; } = notificationId;
+}
+
+public class MarkAllNotificationsAsReadCommand(string userIdOrRecipientId) : IRequest<bool>
+{
+    public string UserIdOrRecipientId { get; set; } = userIdOrRecipientId;
 }
 
 public class CreateTemplateCommand : CreateTemplateRequest, IRequest<TemplateResponse>

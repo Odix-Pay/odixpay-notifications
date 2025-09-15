@@ -9,6 +9,7 @@ CREATE OR ALTER PROCEDURE notifications.sp_CreateNotificationTemplate
     @Type INT,
     @Subject NVARCHAR(200),
     @Body NVARCHAR(MAX),
+    @Locale NVARCHAR(10) = "en",
     @Variables NVARCHAR(MAX) = NULL,
     @IsActive BIT = 1,
     @CreatedAt DATETIME2 = NULL
@@ -23,10 +24,10 @@ BEGIN
         SET @CreatedAt = GETUTCDATE(); -- Default to current UTC time if not provided
     
     INSERT INTO notifications.TBL_NotificationTemplates (
-        Id, [Name], [Slug], [Type], Subject, Body, Variables, IsActive, CreatedAt
+        Id, [Name], [Slug], [Type], Subject, Body, Variables, IsActive, CreatedAt, Locale
     )
     VALUES (
-        @Id, @Name, @Slug, @Type, @Subject, @Body, @Variables, @IsActive, @CreatedAt
+        @Id, @Name, @Slug, @Type, @Subject, @Body, @Variables, @IsActive, @CreatedAt, @Locale
     );
 
     -- Return the created template
@@ -89,6 +90,7 @@ CREATE OR ALTER PROCEDURE notifications.sp_UpdateNotificationTemplate
     @Type INT = NULL,
     @Subject NVARCHAR(200) = NULL,
     @Body NVARCHAR(MAX) = NULL,
+    @Locale NVARCHAR(10) = NULL,
     @Variables NVARCHAR(MAX) = NULL,
     @IsActive BIT = NULL,
     @IsDeleted BIT = NULL,
@@ -107,6 +109,7 @@ BEGIN
         [Type] = COALESCE(@Type, [Type]),
         Subject = COALESCE(@Subject, Subject),
         Body = COALESCE(@Body, Body),
+        Locale = COALESCE(@Locale, Locale),
         Variables = COALESCE(@Variables, Variables),
         IsActive = COALESCE(@IsActive, IsActive),
         IsDeleted = COALESCE(@IsDeleted, IsDeleted),
@@ -134,7 +137,8 @@ CREATE OR ALTER PROCEDURE notifications.sp_GetNotificationTemplatesCount
     @Name NVARCHAR(100) = NULL,
     @Subject NVARCHAR(200) = NULL,
     @Slug NVARCHAR(100) = NULL,
-    @Search NVARCHAR(200) = NULL
+    @Search NVARCHAR(200) = NULL,
+    @Locale NVARCHAR(10) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -147,7 +151,8 @@ BEGIN
       AND (@Name IS NULL OR [Name] LIKE '%' + @Name + '%')
       AND (@Subject IS NULL OR Subject LIKE '%' + @Subject + '%')
       AND (@Slug IS NULL OR [Slug] = @Slug)
-      AND (@Search IS NULL OR (Body LIKE '%' + @Search + '%' OR [Name] LIKE '%' + @Search + '%' OR Subject LIKE '%' + @Search + '%'));
+        AND (@Locale IS NULL OR Locale = @Locale)
+      AND (@Search IS NULL OR (Body LIKE '%' + @Search + '%' OR [Name] LIKE '%' + @Search + '%' OR Subject LIKE '%' + @Search + '%' OR Locale LIKE '%' + @Search + '%'));
 END
 GO
 
@@ -159,6 +164,7 @@ CREATE OR ALTER PROCEDURE notifications.sp_GetNotificationTemplates
     @Subject NVARCHAR(200) = NULL,
     @Slug NVARCHAR(100) = NULL,
     @Search NVARCHAR(200) = NULL,
+    @Locale NVARCHAR(10) = NULL,
     @Page INT = 1,
     @Limit INT = 20
 AS
@@ -169,12 +175,14 @@ BEGIN
 
     SELECT *
     FROM notifications.TBL_NotificationTemplates
-      (@Id IS NULL OR Id = @Id)
+    WHERE 1=1
+      AND (@Id IS NULL OR Id = @Id)
       AND (@Type IS NULL OR [Type] = @Type)
       AND (@Name IS NULL OR [Name] LIKE '%' + @Name + '%')
       AND (@Subject IS NULL OR Subject LIKE '%' + @Subject + '%')
       AND (@Slug IS NULL OR [Slug] = @Slug)
-      AND (@Search IS NULL OR (Body LIKE '%' + @Search + '%' OR [Name] LIKE '%' + @Search + '%' OR Subject LIKE '%' + @Search + '%'))
+      AND (@Locale IS NULL OR Locale = @Locale)
+      AND (@Search IS NULL OR (Body LIKE '%' + @Search + '%' OR [Name] LIKE '%' + @Search + '%' OR Subject LIKE '%' + @Search + '%' OR Locale LIKE '%' + @Search + '%'))
     ORDER BY [Name]
     OFFSET @Offset ROWS
     FETCH NEXT @Limit ROWS ONLY;

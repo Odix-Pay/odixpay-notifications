@@ -26,5 +26,8 @@ namespace OdixPay.Notifications.Domain.DTO.Requests
 
         [JsonPropertyName("search")]
         public string? Search { get; set; }
+
+        [JsonPropertyName("locale")]
+        public string? Locale { get; set; }
     }
 }

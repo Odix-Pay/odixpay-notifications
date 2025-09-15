@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using OdixPay.Notifications.Domain.Constants;
 using OdixPay.Notifications.Domain.Enums;
 
 namespace OdixPay.Notifications.Domain.DTO.Requests;
@@ -44,4 +45,7 @@ public class QueryNotifications : PaginationQueryParams
 
     [JsonPropertyName("isRead")]
     public bool? IsRead { get; set; }
+
+    [JsonPropertyName("locale")]
+    public string? Locale { get; set; }
 }

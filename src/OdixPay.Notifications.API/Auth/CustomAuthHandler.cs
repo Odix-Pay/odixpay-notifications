@@ -2,9 +2,9 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
-using OdixPay.Notifications.API.Constants;
 using TSAuth = OdixPay.Notifications.Domain.Interfaces;
 using OdixPay.Notifications.API.Models.Response;
+using OdixPay.Notifications.Contracts.Constants;
 
 namespace OdixPay.Notifications.API.Auth;
 
@@ -21,14 +21,44 @@ public class CustomAuthHandler(
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
 
-        if (!Request.Headers.TryGetValue(ApiConstants.Headers.Authorization, out var authHeader))
-        {
-            Context.Items["AuthError"] = "Missing Authorization Header";
+        // if (!Request.Headers.TryGetValue(APIConstants.Headers.Authorization, out var authHeader))
+        // {
+        //     Context.Items["AuthError"] = "Missing Authorization Header";
 
-            return AuthenticateResult.Fail("Missing Authorization Header");
+        //     return AuthenticateResult.Fail("Missing Authorization Header");
+        // }
+
+        // var token = authHeader.ToString();
+
+
+        // 1) Try header: Authorization: Bearer <token>
+        string? token = null;
+
+        if (Request.Headers.TryGetValue(APIConstants.Headers.Authorization, out var authHeader) &&
+            !string.IsNullOrWhiteSpace(authHeader))
+        {
+            var raw = authHeader.ToString();
+            token = raw.Trim();
+            // raw.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+            //     ? raw.Substring("Bearer ".Length).Trim()
+            //     : raw.Trim();
         }
 
-        var token = authHeader.ToString();
+        // 2) Fallback for SignalR WebSockets: ?access_token=<token>
+        if (string.IsNullOrEmpty(token))
+        {
+            var qsToken = Request.Query["access_token"].ToString(); // important for client to send token as "Bearer {token}" in query string
+            if (!string.IsNullOrWhiteSpace(qsToken))
+                token = $"Bearer {qsToken}".Trim();
+        }
+
+        // 3) If still no token -> anonymous (NoResult)
+        if (string.IsNullOrEmpty(token))
+        {
+            // Important: do NOT Fail here; returning NoResult enables anonymous flows.
+            _logger.LogDebug("No token provided. Proceeding as anonymous.");
+            return AuthenticateResult.NoResult();
+        }
 
         try
         {
@@ -41,16 +71,16 @@ public class CustomAuthHandler(
             }
 
             var claims = new[] {
-                new Claim(ClaimTypes.NameIdentifier, authResult.UserId!),
-                new Claim(ApiConstants.Headers.KeyId, authResult.KeyId!),
-                new Claim(ApiConstants.Headers.PublicKey, authResult.PublicKey!),
-                new Claim(ApiConstants.Headers.XUserRole, authResult.Role!),
+            new Claim(ClaimTypes.NameIdentifier, authResult.UserId!),
+                new Claim(APIConstants.Headers.KeyId, authResult.KeyId!),
+                new Claim(APIConstants.Headers.PublicKey, authResult.PublicKey!),
+                new Claim(APIConstants.Headers.XUserRole, authResult.Role!),
             };
 
             // Set request header for user region
             if (!string.IsNullOrEmpty(authResult.Region?.Trim()))
             {
-                claims = [.. claims, new Claim(ApiConstants.Headers.XRegion, authResult.Region)];
+                claims = [.. claims, new Claim(APIConstants.Headers.XRegion, authResult.Region)];
             }
 
             if (!string.IsNullOrEmpty(authResult.MerchantId?.Trim()))

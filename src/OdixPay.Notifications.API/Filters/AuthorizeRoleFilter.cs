@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using OdixPay.Notifications.Contracts.Constants;
 using OdixPay.Notifications.API.Constants;
 using OdixPay.Notifications.API.Models.Response;
 using OdixPay.Notifications.Domain.Interfaces;
@@ -36,7 +37,7 @@ public class AuthorizeRoleFilter() : Attribute, IAsyncAuthorizationFilter
             return;
         }
 
-        var userRoleId = user.FindFirst(ApiConstants.Headers.XUserRole)?.Value;
+        var userRoleId = user.FindFirst(APIConstants.Headers.XUserRole)?.Value;
 
         if (string.IsNullOrEmpty(userRoleId))
         {
@@ -71,7 +72,7 @@ public class AuthorizeRoleFilter() : Attribute, IAsyncAuthorizationFilter
     private IActionResult CreateUnauthorizedResult(string message)
     {
         return new UnauthorizedObjectResult(StandardResponse<object, string>.Error(
-            error: ApiConstants.ErrorTypes.Unauthorized,
+            error: APIConstants.ErrorTypes.Unauthorized,
             message: message
         ));
     }
@@ -79,7 +80,7 @@ public class AuthorizeRoleFilter() : Attribute, IAsyncAuthorizationFilter
     private IActionResult CreateForbiddenResult(string message)
     {
         return new ObjectResult(StandardResponse<object, string>.Error(
-            error: ApiConstants.ErrorTypes.Forbidden,
+            error: APIConstants.ErrorTypes.Forbidden,
             message: message
         ))
         { StatusCode = StatusCodes.Status403Forbidden };
@@ -88,7 +89,7 @@ public class AuthorizeRoleFilter() : Attribute, IAsyncAuthorizationFilter
     private IActionResult CreateBadRequestResult(string message)
     {
         return new BadRequestObjectResult(StandardResponse<object, string>.Error(
-            error: ApiConstants.ErrorTypes.BadRequest,
+            error: APIConstants.ErrorTypes.BadRequest,
             message: message
         ));
     }

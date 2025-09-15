@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using OdixPay.Notifications.Application.Commands;
 using OdixPay.Notifications.Application.Exceptions;
 using OdixPay.Notifications.Application.UseCases;
+using OdixPay.Notifications.Domain.Constants;
 using OdixPay.Notifications.Domain.DTO.Requests;
 using OdixPay.Notifications.Domain.Entities;
 using OdixPay.Notifications.Domain.Enums;
@@ -13,7 +14,9 @@ using OdixPay.Notifications.Domain.Utils;
 
 namespace OdixPay.Notifications.Application.Handlers;
 
-public class CreateNotificationHandler(INotificationRepository notificationRepository, ValidateTemplateVariables validateTemplateVariables, ILogger<CreateNotificationHandler> logger, INotificationRecipientRepository notificationRecipientRepository, ITemplateEngine templateEngine, INotificationTemplateRepository notificationTemplateRepository, IMapper mapper) : IRequestHandler<CreateNotificationCommand, NotificationResponse>
+public class CreateNotificationHandler(INotificationRepository notificationRepository, ValidateTemplateVariables validateTemplateVariables, ILogger<CreateNotificationHandler> logger, INotificationRecipientRepository notificationRecipientRepository,
+// ITemplateEngine templateEngine,
+INotificationTemplateRepository notificationTemplateRepository, IMapper mapper) : IRequestHandler<CreateNotificationCommand, NotificationResponse>
 {
     private readonly INotificationRepository _notificationRepository = notificationRepository;
     private readonly ValidateTemplateVariables _validateTemplateVariables = validateTemplateVariables ?? throw new ArgumentNullException(nameof(validateTemplateVariables));
@@ -21,11 +24,12 @@ public class CreateNotificationHandler(INotificationRepository notificationRepos
     private readonly IMapper _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     private readonly INotificationRecipientRepository _notificationRecipientRepo = notificationRecipientRepository ?? throw new ArgumentNullException(nameof(notificationRecipientRepository));
 
-    private readonly ITemplateEngine _templateEngine = templateEngine ?? throw new ArgumentNullException(nameof(templateEngine));
+    // private readonly ITemplateEngine _templateEngine = templateEngine ?? throw new ArgumentNullException(nameof(templateEngine));
     private readonly INotificationTemplateRepository _notificationTemplateRepository = notificationTemplateRepository ?? throw new ArgumentNullException(nameof(notificationTemplateRepository));
 
     public async Task<NotificationResponse> Handle(CreateNotificationCommand request, CancellationToken cancellationToken)
     {
+        var defaultLocale = NotificationConstants.DefaultLocale;
         _logger.LogInformation("Handling CreateNotificationCommand for UserId: {UserId}", JsonSerializer.Serialize(request));
 
 
@@ -39,7 +43,8 @@ public class CreateNotificationHandler(INotificationRepository notificationRepos
             Recipient = request.Recipient,
             ScheduledAt = request.ScheduledAt ?? DateTime.UtcNow,
             RetryCount = 0,
-            MaxRetries = request.MaxRetries
+            MaxRetries = request.MaxRetries,
+            DefaultLocale = request.Locale ?? defaultLocale
         };
 
         if (request.Type != null)
@@ -68,7 +73,7 @@ public class CreateNotificationHandler(INotificationRepository notificationRepos
         }
 
         // If a template is provided, validate and set it
-        if ((request.TemplateId.HasValue || !string.IsNullOrWhiteSpace(request.TemplateSlug)) && request.TemplateVariables != null)
+        if (request.TemplateId.HasValue || !string.IsNullOrWhiteSpace(request.TemplateSlug))
         {
             try
             {
@@ -80,7 +85,8 @@ public class CreateNotificationHandler(INotificationRepository notificationRepos
                 }
                 else if (!string.IsNullOrWhiteSpace(request.TemplateSlug))
                 {
-                    template = await _notificationTemplateRepository.GetTemplateByNameAsync(request.TemplateSlug, cancellationToken);
+                    var foundTemplates = await _notificationTemplateRepository.GetTemplatesByNameOrSlugAsync(request.TemplateSlug, cancellationToken);
+                    template = foundTemplates.FirstOrDefault();
                 }
 
                 if (template == null)
@@ -121,13 +127,23 @@ public class CreateNotificationHandler(INotificationRepository notificationRepos
                 _logger.LogInformation("Template variables validated successfully for template {TemplateId}", request.TemplateId);
 
                 // Set Overrides
-                notification.Type = template.Type; // override type from template
+                notification.Type = template.Type;   // override type from template
 
                 // 3. Use TemplateEngine here!
-                notification.Title = _templateEngine.ProcessTemplate(template.Subject, request.TemplateVariables, cancellationToken);
+                // We want to compile the message at real time when user requests for notifications.
+                // We will use template engine in get notification handler to compile the message in real time and in send notification handler to compile the message before sending
 
-                notification.Message = _templateEngine.ProcessTemplate(template.Body, request.TemplateVariables, cancellationToken);
-                notification.TemplateId = template.Id;
+
+                // notification.Title = _templateEngine.ProcessTemplate(template.Subject, request.TemplateVariables ?? [], cancellationToken);
+
+                // notification.Message = _templateEngine.ProcessTemplate(template.Body, request.TemplateVariables ?? [], cancellationToken);
+
+                // Set the template details
+                // Instead of mapping with the template id, we map with the slug, so that we can easily use the right language during rendering (compilation). Fetching by slug will return all related templates for different languages
+                // This will also make it easier to switch templates if needed in the future
+                notification.TemplateSlug = template.Slug;
+                // notification.TemplateId = template.Id;
+                notification.DefaultLocale = request.Locale ?? defaultLocale;
 
                 notification.TemplateVariables = JsonSerializer.Serialize(request.TemplateVariables);
             }
@@ -183,17 +199,78 @@ public class CreateNotificationHandler(INotificationRepository notificationRepos
 
 public class SendNotificationHandler(
     INotificationRepository notificationRepository,
+    INotificationTemplateRepository notificationTemplateRepository,
+    ITemplateEngine templateEngine,
     INotificationService notificationService) : IRequestHandler<SendNotificationCommand, bool>
 {
-    private readonly INotificationRepository _notificationRepository = notificationRepository;
-    private readonly INotificationService _notificationService = notificationService;
+    private readonly INotificationRepository _notificationRepository = notificationRepository ?? throw new ArgumentNullException(nameof(notificationRepository));
+    private readonly INotificationService _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+    private readonly INotificationTemplateRepository _notificationTemplateRepository = notificationTemplateRepository ?? throw new ArgumentNullException(nameof(notificationTemplateRepository));
+    private readonly ITemplateEngine _templateEngine = templateEngine ?? throw new ArgumentNullException(nameof(templateEngine));
 
     public async Task<bool> Handle(SendNotificationCommand request, CancellationToken cancellationToken)
     {
-        var notification = await _notificationRepository.GetNotificationByIdAsync(request.NotificationId);
+        var notification = await _notificationRepository.GetNotificationByIdAsync(request.NotificationId, cancellationToken);
 
         if (notification == null)
             return false;
+
+        System.Console.WriteLine("Sending notification: " + JsonSerializer.Serialize(notification));
+
+
+        // Compile message if there is a template associated
+        if (notification.TemplateId.HasValue || (!string.IsNullOrWhiteSpace(notification.TemplateSlug) && !string.IsNullOrEmpty(notification.TemplateSlug)))
+        {
+            System.Console.WriteLine("Compiling message for notification with template: " + notification.TemplateId + " or slug: " + notification.TemplateSlug);
+
+            IEnumerable<NotificationTemplate> templates = [];
+
+            if (!string.IsNullOrWhiteSpace(notification.TemplateSlug))
+            {
+                templates = await _notificationTemplateRepository.GetTemplatesByNameOrSlugAsync(notification.TemplateSlug, cancellationToken);
+            }
+            else if (notification.TemplateId.HasValue)
+            {
+                var foundTemplate = await _notificationTemplateRepository.GetTemplateByIdAsync(notification.TemplateId.Value, cancellationToken);
+                if (foundTemplate != null)
+                {
+                    templates = [foundTemplate];
+                }
+            }
+
+            if (!templates.Any())
+            {
+                throw new NotFoundException("Notification template not found for rendering.");
+            }
+
+            // Try to get the template in the requested locale
+            var template = templates.FirstOrDefault(t => t.Locale.Equals(request.Locale, StringComparison.OrdinalIgnoreCase));
+
+            // If not found, try to get the template in the notification's default locale
+            template ??= templates.FirstOrDefault(t => t.Locale.Equals(notification.DefaultLocale, StringComparison.OrdinalIgnoreCase));
+
+            // If not found, fallback to default locale
+            template ??= templates.FirstOrDefault(t => t.Locale.Equals(NotificationConstants.DefaultLocale, StringComparison.OrdinalIgnoreCase));
+
+            // If still not found, use the first available template
+            template ??= templates.First();
+
+            if (template == null)
+            {
+                throw new NotFoundException("Notification template not found for rendering.");
+            }
+
+            // Compile the title and message using the template engine
+            var templateVariables = string.IsNullOrWhiteSpace(notification.TemplateVariables)
+                ? []
+                : JsonSerializer.Deserialize<Dictionary<string, string>>(notification.TemplateVariables) ?? [];
+
+            notification.Title = _templateEngine.ProcessTemplate(template.Subject, templateVariables, cancellationToken);
+            notification.Message = _templateEngine.ProcessTemplate(template.Body, templateVariables, cancellationToken);
+
+        }
+
+        System.Console.WriteLine("Compiled notification: " + JsonSerializer.Serialize(notification));
 
         var success = await _notificationService.SendNotificationAsync(notification, cancellationToken);
 
@@ -226,6 +303,17 @@ public class MarkNotificationAsReadHandler(INotificationRepository notificationR
     public async Task<bool> Handle(MarkNotificationAsReadCommand request, CancellationToken cancellationToken)
     {
         await _notificationRepository.MarkAsReadAsync(request.NotificationId, cancellationToken);
+        return true;
+    }
+}
+
+public class MarkAllNotificationsAsReadHandler(INotificationRepository notificationRepository) : IRequestHandler<MarkAllNotificationsAsReadCommand, bool>
+{
+    private readonly INotificationRepository _notificationRepository = notificationRepository ?? throw new ArgumentNullException(nameof(notificationRepository));
+
+    public async Task<bool> Handle(MarkAllNotificationsAsReadCommand request, CancellationToken cancellationToken)
+    {
+        await _notificationRepository.MarkAllAsReadAsync(request.UserIdOrRecipientId, cancellationToken);
         return true;
     }
 }

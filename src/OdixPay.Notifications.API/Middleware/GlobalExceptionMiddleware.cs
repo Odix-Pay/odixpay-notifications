@@ -1,3 +1,4 @@
+using OdixPay.Notifications.Contracts.Constants;
 using OdixPay.Notifications.API.Constants;
 using OdixPay.Notifications.API.Models.Response;
 using OdixPay.Notifications.Application.Exceptions;
@@ -37,7 +38,7 @@ public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExcep
         }
 
         var response = new StandardResponse<object, object>(
-            status: ApiConstants.Response.ErrorStatus,
+            status: APIConstants.Response.ErrorStatus,
             data: null,
             error: errorPayload,
             message: message

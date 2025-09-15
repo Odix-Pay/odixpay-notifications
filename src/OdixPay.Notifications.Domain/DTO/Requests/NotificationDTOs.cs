@@ -150,6 +150,10 @@ public class CreateNotificationBaseRequest : IValidatableObject
     [JsonPropertyName("templateSlug")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? TemplateSlug { get; set; }
+
+    [JsonPropertyName("locale")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Locale { get; set; } = "en";  // Default to English
 }
 
 public class CreateNotificationRequest : CreateNotificationBaseRequest
@@ -162,22 +166,22 @@ public class CreateNotificationRequest : CreateNotificationBaseRequest
 public record NotificationResponse : BaseEntityResponse
 {
     [JsonPropertyName("userId")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string UserId { get; set; }
 
     [JsonPropertyName("type")]
     public NotificationType Type { get; set; }
 
     [JsonPropertyName("title")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string Title { get; set; }
 
     [JsonPropertyName("message")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string Message { get; set; }
 
     [JsonPropertyName("data")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Data { get; set; }
 
     [JsonPropertyName("status")]
@@ -187,7 +191,7 @@ public record NotificationResponse : BaseEntityResponse
     public NotificationPriority Priority { get; set; }
 
     [JsonPropertyName("recipient")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Recipient { get; set; }
 
     [JsonPropertyName("scheduledAt")]
@@ -208,27 +212,27 @@ public record NotificationResponse : BaseEntityResponse
     public int RetryCount { get; set; }
 
     [JsonPropertyName("maxRetries")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int MaxRetries { get; set; }
 
     [JsonPropertyName("externalId")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ExternalId { get; set; }
 
     [JsonPropertyName("templateId")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Guid? TemplateId { get; set; }  // Reference to template
 
     [JsonPropertyName("templateVariables")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? TemplateVariables { get; set; }  // JSON with variable values for
 
     [JsonPropertyName("isRead")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool IsRead { get; set; }
 
     [JsonPropertyName("sender")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Sender { get; set; } // Optional sender field
 }
 
@@ -257,6 +261,10 @@ public class CreateTemplateRequest
     [JsonPropertyName("variables")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, TemplateVariableStructure>? Variables { get; set; }
+
+    [JsonPropertyName("locale")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Locale { get; set; }
 }
 
 public class UpdateTemplateRequest
@@ -271,6 +279,9 @@ public class UpdateTemplateRequest
 
     [JsonPropertyName("subject")]
     public string? Subject { get; set; }
+
+    [JsonPropertyName("locale")]
+    public string? Locale { get; set; }
 
     [JsonPropertyName("body")]
     public string? Body { get; set; }

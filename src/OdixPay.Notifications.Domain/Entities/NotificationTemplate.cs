@@ -12,6 +12,8 @@ public class NotificationTemplate : BaseEntity
     public string Body { get; set; } = string.Empty;
     public string? Variables { get; set; }
 
+    public string Locale { get; set; } = "en"; // Language/locale of the template, e.g., "en", "fr", "es" - Defaults to "en"
+
     public void GenerateSlug()
     {
         Slug = SlugifyString.Slugify(Name);

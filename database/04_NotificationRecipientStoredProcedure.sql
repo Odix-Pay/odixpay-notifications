@@ -8,7 +8,8 @@ CREATE OR ALTER PROCEDURE notifications.sp_AddNotificationRecipient
     @UserId NVARCHAR(100),
     @Type INT,
     @Recipient NVARCHAR(MAX),
-    @IsActive BIT = 1
+    @IsActive BIT = 1,
+    @DefaultLanguage NVARCHAR(10) = "en"
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -18,8 +19,8 @@ BEGIN
         SET @Id = NEWID();
     END
 
-    INSERT INTO notifications.TBL_NotificationRecipients (Id, Name, UserId, [Type], Recipient, IsActive)
-    VALUES (@Id, @Name, @UserId, @Type, @Recipient, @IsActive);
+    INSERT INTO notifications.TBL_NotificationRecipients (Id, Name, UserId, [Type], Recipient, IsActive, DefaultLanguage)
+    VALUES (@Id, @Name, @UserId, @Type, @Recipient, @IsActive, @DefaultLanguage);
 END
 GO
 
@@ -44,6 +45,7 @@ CREATE OR ALTER PROCEDURE notifications.sp_QueryNotificationRecipients
     @Search NVARCHAR(100) = NULL,
     @IsActive BIT = NULL,
     @IsDeleted BIT = NULL,
+    @DefaultLanguage NVARCHAR(10) = NULL,
     @Page INT = 1,
     @Limit INT = 100
 AS
@@ -60,7 +62,8 @@ BEGIN
         AND (@Type IS NULL OR [Type] = @Type)
         AND (@IsActive IS NULL OR [IsActive] = @IsActive)
         AND (@IsDeleted IS NULL OR [IsDeleted] = @IsDeleted)
-        AND (@Search IS NULL OR [Recipient] LIKE '%' + @Search + '%' OR [Name] LIKE '%' + @Search + '%')
+        AND (@DefaultLanguage IS NULL OR DefaultLanguage = @DefaultLanguage)
+        AND (@Search IS NULL OR [Recipient] LIKE '%' + @Search + '%' OR [Name] LIKE '%' + @Search + '%' OR DefaultLanguage LIKE '%' + @Search + '%')
     ORDER BY CreatedAt DESC
     OFFSET @Offset ROWS
     FETCH NEXT @Limit ROWS ONLY;
@@ -86,7 +89,8 @@ CREATE OR ALTER PROCEDURE notifications.sp_UpdateNotificationRecipient
     @UserId NVARCHAR(100) = NULL,
     @Recipient NVARCHAR(MAX) = NULL,
     @IsActive BIT = NULL,
-    @IsDeleted BIT = NULL
+    @IsDeleted BIT = NULL,
+    @DefaultLanguage NVARCHAR(10) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -97,7 +101,8 @@ BEGIN
         UserId = COALESCE(@UserId, UserId),
         Recipient = COALESCE(@Recipient, Recipient),
         IsActive = COALESCE(@IsActive, IsActive),
-        IsDeleted = COALESCE(@IsDeleted, IsDeleted)
+        IsDeleted = COALESCE(@IsDeleted, IsDeleted),
+        DefaultLanguage = COALESCE(@DefaultLanguage, DefaultLanguage)
     WHERE Id = @Id;
 END
 GO
@@ -138,3 +143,17 @@ BEGIN
         AND (@IsDeleted IS NULL OR [IsDeleted] = @IsDeleted);
 END
 GO
+
+-- Stored Procedure: Update Notification Recipient Language
+CREATE OR ALTER PROCEDURE notifications.sp_UpdateNotificationRecipientLanguage
+    @UserId NVARCHAR(100),
+    @DefaultLanguage NVARCHAR(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE notifications.TBL_NotificationRecipients
+    SET DefaultLanguage = @DefaultLanguage
+    WHERE UserId = @UserId;
+END
+GO  

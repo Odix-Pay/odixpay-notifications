@@ -28,12 +28,8 @@ public class GetTemplateByIdQuery : IRequest<TemplateResponse?>
     }
 }
 
-public class GetTemplateByNameQuery : IRequest<TemplateResponse?>
+public class GetTemplateByNameQuery(string name, string? locale = null) : IRequest<TemplateResponse?>
 {
-    public string Name { get; set; }
-
-    public GetTemplateByNameQuery(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; set; } = name;
+    public string? Locale { get; set; } = locale;
 }

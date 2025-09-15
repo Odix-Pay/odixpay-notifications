@@ -1,6 +1,6 @@
-namespace OdixPay.Notifications.API.Constants;
+namespace OdixPay.Notifications.Contracts.Constants;
 
-internal static class ApiConstants
+public static class APIConstants
 {
     /// <summary>
     /// Constants related to HTTP headers used in authentication and authorization.

@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text.Json;
-using OdixPay.Notifications.API.Constants;
+using OdixPay.Notifications.Contracts.Constants;
 using OdixPay.Notifications.API.Models.Response;
 using OdixPay.Notifications.Application.Exceptions;
 
@@ -14,7 +14,7 @@ public class StandardResponseMiddleware(RequestDelegate next)
     {
         // Skip middleware for Swagger-related requests
         var path = context.Request.Path.Value?.ToLower();
-        if (path != null && (path.StartsWith(ApiConstants.Paths.Swagger) || path.StartsWith(ApiConstants.Paths.VersionedSwagger)))
+        if (path != null && (path.StartsWith(APIConstants.Paths.Swagger) || path.StartsWith(APIConstants.Paths.VersionedSwagger)))
         {
             await _next(context);
             return;
@@ -48,7 +48,7 @@ public class StandardResponseMiddleware(RequestDelegate next)
                 context.Response.ContentType = "application/json";
 
                 var res = StandardResponse<object, object>.Error(
-                    ApiConstants.ErrorTypes.NotFound,
+                    APIConstants.ErrorTypes.NotFound,
                     "The requested resource was not found."
                 );
 
@@ -85,11 +85,11 @@ public class StandardResponseMiddleware(RequestDelegate next)
             object? data = null;
             object? error = null;
             string? message = "Operation completed successfully";
-            string status = ApiConstants.Response.SuccessStatus;
+            string status = APIConstants.Response.SuccessStatus;
 
             if (context.Response.StatusCode >= 400)
             {
-                status = ApiConstants.Response.ErrorStatus;
+                status = APIConstants.Response.ErrorStatus;
                 error = GetErrorType(context.Response.StatusCode);
                 var errorData = GetErrorData(context.Response.StatusCode, responseContent);
 
@@ -147,13 +147,13 @@ public class StandardResponseMiddleware(RequestDelegate next)
     // Converts a given http error into a human readable text.
     private static string GetErrorType(int statusCode) => statusCode switch
     {
-        (int)HttpStatusCode.Unauthorized => ApiConstants.ErrorTypes.Unauthorized,
-        (int)HttpStatusCode.Forbidden => ApiConstants.ErrorTypes.Forbidden,
-        (int)HttpStatusCode.NotFound => ApiConstants.ErrorTypes.NotFound,
-        (int)HttpStatusCode.BadRequest => ApiConstants.ErrorTypes.BadRequest,
-        (int)HttpStatusCode.UnprocessableEntity => ApiConstants.ErrorTypes.ValidationError,
-        (int)HttpStatusCode.Conflict => ApiConstants.ErrorTypes.Conflict,
-        _ => ApiConstants.ErrorTypes.InternalServerError
+        (int)HttpStatusCode.Unauthorized => APIConstants.ErrorTypes.Unauthorized,
+        (int)HttpStatusCode.Forbidden => APIConstants.ErrorTypes.Forbidden,
+        (int)HttpStatusCode.NotFound => APIConstants.ErrorTypes.NotFound,
+        (int)HttpStatusCode.BadRequest => APIConstants.ErrorTypes.BadRequest,
+        (int)HttpStatusCode.UnprocessableEntity => APIConstants.ErrorTypes.ValidationError,
+        (int)HttpStatusCode.Conflict => APIConstants.ErrorTypes.Conflict,
+        _ => APIConstants.ErrorTypes.InternalServerError
     };
 
     // Gets standard response message to return to server

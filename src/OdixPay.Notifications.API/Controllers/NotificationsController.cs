@@ -8,13 +8,14 @@ using OdixPay.Notifications.Application.Commands;
 using OdixPay.Notifications.Application.Queries;
 using OdixPay.Notifications.Domain.DTO.Requests;
 using OdixPay.Notifications.API.Filters;
+using OdixPay.Notifications.Contracts.Constants;
 
 namespace OdixPay.Notifications.API.Controllers;
 
-[Route($"{ApiConstants.APIVersion.VersionRouteName}/notifications")]
+[Route($"{APIConstants.APIVersion.VersionRouteName}/notifications")]
 [ApiController]
-[ApiVersion(ApiConstants.APIVersion.VersionString)]
-[Authorize(AuthenticationSchemes = ApiConstants.Authentication.CustomAuthScheme)]
+[ApiVersion(APIConstants.APIVersion.VersionString)]
+[Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
 public class NotificationsController(IMediator mediator) : BaseController
 {
     private readonly IMediator _mediator = mediator;
@@ -147,6 +148,27 @@ public class NotificationsController(IMediator mediator) : BaseController
     public async Task<IActionResult> MarkAsRead(Guid id)
     {
         var command = new MarkNotificationAsReadCommand(id);
+        var result = await _mediator.Send(command);
+        return SuccessResponse(result);
+    }
+
+    [HttpPost("user/{userId}/mark-read")]
+    [AuthorizeRoleFilter(Permission = Permissions.Notification.Update)]
+    public async Task<IActionResult> MarkAllAsReadAdmin(string userId)
+    {
+        var command = new MarkAllNotificationsAsReadCommand(userId);
+        var result = await _mediator.Send(command);
+        return SuccessResponse(result);
+    }
+
+    [HttpPost("account/mark-all-read")]
+    public async Task<IActionResult> MarkAllAsRead()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedResponse();
+
+        var command = new MarkAllNotificationsAsReadCommand(userId);
         var result = await _mediator.Send(command);
         return SuccessResponse(result);
     }

@@ -12,12 +12,17 @@ COPY ["src/OdixPay.Notifications.API/OdixPay.Notifications.API.csproj", "src/Odi
 COPY ["src/OdixPay.Notifications.Application/OdixPay.Notifications.Application.csproj", "src/OdixPay.Notifications.Application/"]
 COPY ["src/OdixPay.Notifications.Domain/OdixPay.Notifications.Domain.csproj", "src/OdixPay.Notifications.Domain/"]
 COPY ["src/OdixPay.Notifications.Infrastructure/OdixPay.Notifications.Infrastructure.csproj", "src/OdixPay.Notifications.Infrastructure/"]
+COPY ["src/OdixPay.Notifications.Realtime.Contracts/OdixPay.Notifications.Realtime.Contracts.csproj", "src/OdixPay.Notifications.Realtime.Contracts/"]
 
 # Restore dependencies
 RUN dotnet restore "src/OdixPay.Notifications.API/OdixPay.Notifications.API.csproj"
 
 # Copy all source code and configuration files
 COPY . .
+
+# Replace appsettings.json with appsettings.Development.json for development environment
+RUN rm -f src/OdixPay.Notifications.API/appsettings.json
+RUN mv src/OdixPay.Notifications.API/appsettings.Development.json src/OdixPay.Notifications.API/appsettings.json
 
 # Build the application
 WORKDIR "/src/src/OdixPay.Notifications.API"
@@ -37,7 +42,7 @@ COPY --from=publish /app/publish .
 COPY --from=build /src/src/OdixPay.Notifications.API/*.pem ./
 
 # Copy any other configuration files needed from OdixPay.Notifications.API folder
-COPY --from=build /src/src/OdixPay.Notifications.API/*.json ./
+# COPY --from=build /src/src/OdixPay.Notifications.API/appsettings.Development.json ./
 COPY --from=build /src/src/OdixPay.Notifications.API/*.xml ./
 
 # Create non-root user for security (optional but recommended)

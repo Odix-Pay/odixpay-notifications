@@ -18,6 +18,7 @@ public interface INotificationRepository
     Task IncrementRetryCountAsync(Guid id, CancellationToken cancellationToken = default);
     Task<int> GetUnreadCountAsync(string userId, CancellationToken cancellationToken = default);
     Task MarkAsReadAsync(Guid id, CancellationToken cancellationToken = default);
+    Task MarkAllAsReadAsync(string userIdOrRecipientId, CancellationToken cancellationToken = default);
 }
 
 

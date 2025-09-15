@@ -10,7 +10,7 @@ namespace OdixPay.Notifications.Application.UseCases;
 public class ValidateTemplateVariablesDTO
 {
     public Guid TemplateId { get; set; }
-    public IDictionary<string, string> Variables { get; set; }
+    public IDictionary<string, string>? Variables { get; set; }
 }
 
 public class ValidateTemplateVariables(INotificationTemplateRepository templateRepository, ILogger<ValidateTemplateVariables> logger) : IUseCase<ValidateTemplateVariablesDTO, Task<bool>>
@@ -43,6 +43,11 @@ public class ValidateTemplateVariables(INotificationTemplateRepository templateR
         // Parse the variables from the template
         try
         {
+            // If request.Variables is null, initialize it to an empty dictionary.
+            // This ensures that we can safely check for required variables without encountering a null reference.
+            // If there are required variables in the template, the validation will fail as expected.
+            request.Variables ??= new Dictionary<string, string>();
+
             var variables = JsonSerializer.Deserialize<Dictionary<string, TemplateVariableStructure>>(template.Variables);
 
             if (variables == null)

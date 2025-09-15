@@ -32,6 +32,7 @@ CREATE TABLE notifications.TBL_Notifications (
     MaxRetries INT NOT NULL DEFAULT 3,
     ExternalId NVARCHAR(100) NULL,
     IsRead BIT NOT NULL DEFAULT 0,
+    DefaultLocale NVARCHAR(10) NOT NULL DEFAULT "en",
     TemplateId UNIQUEIDENTIFIER NULL, -- Foreign key to Notification Template
     TemplateVariables NVARCHAR(MAX) NULL -- JSON or XML to store dynamic variables for the template
 );
@@ -40,11 +41,12 @@ GO
 -- Create NotificationTemplates Table
 CREATE TABLE notifications.TBL_NotificationTemplates (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
-    [Name] NVARCHAR(100) NOT NULL UNIQUE,
-    Slug NVARCHAR(100) NOT NULL UNIQUE,
+    [Name] NVARCHAR(100) NOT NULL,
+    Slug NVARCHAR(100) NOT NULL,
     [Type] INT NOT NULL,
     Subject NVARCHAR(200) NOT NULL,
     Body NVARCHAR(MAX) NOT NULL,
+    Locale NVARCHAR(10) NOT NULL DEFAULT "en",
     Variables NVARCHAR(MAX) NULL,
     IsActive BIT NOT NULL DEFAULT 1,
     IsDeleted BIT NOT NULL DEFAULT 0,
@@ -60,6 +62,7 @@ CREATE TABLE notifications.TBL_NotificationRecipients (
     [Type] INT NOT NULL,
     Recipient NVARCHAR(MAX) NOT NULL,
     Name NVARCHAR(100) NULL,
+    DefaultLanguage NVARCHAR(10) NOT NULL DEFAULT "en",
     CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
     UpdatedAt DATETIME2 NULL,
     IsActive BIT NOT NULL DEFAULT 1,
@@ -81,4 +84,8 @@ CREATE INDEX IX_NotificationTemplates_IsActive ON notifications.TBL_Notification
 CREATE INDEX IX_NotificationRecipients_UserId ON notifications.TBL_NotificationRecipients(UserId);
 CREATE INDEX IX_NotificationRecipients_Type ON notifications.TBL_NotificationRecipients([Type]);
 CREATE INDEX IX_NotificationRecipients_UserIdType ON notifications.TBL_NotificationRecipients(UserId, [Type]);
+
+-- Create unique index on slug; Name & Locale
+CREATE UNIQUE INDEX IX_NotificationTemplates_Name_Locale ON notifications.TBL_NotificationTemplates(Name, Locale);
+CREATE UNIQUE INDEX IX_NotificationTemplates_Slug_Locale ON notifications.TBL_NotificationTemplates(Slug, Locale);
 GO

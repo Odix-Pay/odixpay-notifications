@@ -62,7 +62,8 @@ public class NotificationRecipientRepository(IConnectionFactory connectionFactor
             recipient.UserId,
             Type = (int)recipient.Type,
             recipient.Recipient,
-            recipient.IsActive
+            recipient.IsActive,
+            recipient.DefaultLanguage
         };
 
         await connection.ExecuteAsync(StoredProcedures.NotificationRecipient.Create, parameters, commandType: CommandType.StoredProcedure);
@@ -81,10 +82,25 @@ public class NotificationRecipientRepository(IConnectionFactory connectionFactor
             recipient.UserId,
             recipient.Recipient,
             recipient.IsActive,
-            recipient.IsDeleted
+            recipient.IsDeleted,
+            recipient.DefaultLanguage
         };
 
         await connection.ExecuteAsync(StoredProcedures.NotificationRecipient.Update, parameters, commandType: CommandType.StoredProcedure);
+    }
+    public async Task UpdateRecipientLanguageAsync(string recipientId, string language, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        using var connection = _connectionFactory.CreateConnection();
+
+        var parameters = new
+        {
+            RecipientId = recipientId,
+            Language = language
+        };
+
+        await connection.ExecuteAsync(StoredProcedures.NotificationRecipient.UpdateLanguage, parameters, commandType: CommandType.StoredProcedure);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -110,6 +126,7 @@ public class NotificationRecipientRepository(IConnectionFactory connectionFactor
             query.Search,
             query.IsActive,
             query.IsDeleted,
+            query.DefaultLanguage
         };
 
         var count = await connection.QuerySingleAsync<int>(
@@ -147,6 +164,7 @@ public class NotificationRecipientRepository(IConnectionFactory connectionFactor
             query.Search,
             query.IsActive,
             query.IsDeleted,
+            query.DefaultLanguage,
             query.Page,
             query.Limit,
         };

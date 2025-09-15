@@ -3,6 +3,7 @@ using AutoMapper;
 using MediatR;
 using OdixPay.Notifications.Application.Commands;
 using OdixPay.Notifications.Application.Exceptions;
+using OdixPay.Notifications.Domain.Constants;
 using OdixPay.Notifications.Domain.DTO.Requests;
 using OdixPay.Notifications.Domain.Entities;
 using OdixPay.Notifications.Domain.Interfaces;
@@ -23,10 +24,11 @@ public class CreateTemplateHandler(INotificationTemplateRepository templateRepos
             Subject = request.Subject,
             Body = request.Body,
             Variables = JsonSerializer.Serialize(request?.Variables ?? []),
+            Locale = request?.Locale ?? NotificationConstants.DefaultLocale, // Default to English
         };
 
         // Ensure template name is unique
-        if (await _templateRepository.GetTemplateByNameAsync(template.Name, cancellationToken) != null)
+        if (await _templateRepository.GetTemplateBySlugAndLocaleAsync(template.Name, template.Locale, cancellationToken) != null)
         {
             throw new BadRequestException($"Template with name '{template.Name}' already exists.");
         }
@@ -48,18 +50,18 @@ public class UpdateTemplateHandler(INotificationTemplateRepository templateRepos
 
         var req = request.Request ?? throw new BadRequestException("Update request cannot be null.");
 
+        // Ensure template name is unique
+        if (!string.IsNullOrWhiteSpace(req.Name) && await _templateRepository.GetTemplateBySlugAndLocaleAsync(req.Name, req.Locale ?? existingTemplate.Locale ?? NotificationConstants.DefaultLocale, cancellationToken) != null &&
+            existingTemplate.Name != req.Name)
+        {
+            throw new BadRequestException($"Template with name '{req.Name}' and locale '{req.Locale ?? existingTemplate.Locale ?? NotificationConstants.DefaultLocale}' already exists.");
+        }
+
         existingTemplate.Name = req.Name ?? existingTemplate.Name;
         existingTemplate.Type = req.Type ?? existingTemplate.Type;
         existingTemplate.Subject = req.Subject ?? existingTemplate.Subject;
         existingTemplate.Body = req.Body ?? existingTemplate.Body;
-        existingTemplate.Variables = JsonSerializer.Serialize(req.Variables ?? JsonSerializer.Deserialize<Dictionary<string, TemplateVariableStructure>>(existingTemplate?.Variables ?? "{}") ?? new Dictionary<string, TemplateVariableStructure>());
-
-        // Ensure template name is unique
-        if (await _templateRepository.GetTemplateByNameAsync(existingTemplate.Name, cancellationToken) != null &&
-            existingTemplate.Name != req.Name)
-        {
-            throw new BadRequestException($"Template with name '{req.Name}' already exists.");
-        }
+        existingTemplate.Variables = JsonSerializer.Serialize(req.Variables ?? JsonSerializer.Deserialize<Dictionary<string, TemplateVariableStructure>>(existingTemplate.Variables ?? "{}") ?? new Dictionary<string, TemplateVariableStructure>());
 
         existingTemplate.GenerateSlug(); // Ensure slug is updated
 
