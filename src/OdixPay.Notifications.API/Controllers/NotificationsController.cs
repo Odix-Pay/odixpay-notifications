@@ -15,13 +15,14 @@ namespace OdixPay.Notifications.API.Controllers;
 [Route($"{APIConstants.APIVersion.VersionRouteName}/notifications")]
 [ApiController]
 [ApiVersion(APIConstants.APIVersion.VersionString)]
-[Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
+
 public class NotificationsController(IMediator mediator) : BaseController
 {
     private readonly IMediator _mediator = mediator;
 
     [HttpPost]
     [AuthorizeRoleFilter(Permission = Permissions.Notification.Create)]
+    [Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
     public async Task<IActionResult> CreateNotification([FromBody] CreateNotificationRequest request)
     {
         var command = new CreateNotificationCommand()
@@ -44,6 +45,7 @@ public class NotificationsController(IMediator mediator) : BaseController
 
     [HttpGet("{id}")]
     [AuthorizeRoleFilter(Permission = Permissions.Notification.Read)]
+    [Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
     public async Task<IActionResult> GetNotification(Guid id)
     {
         var query = new GetNotificationByIdQuery(id);
@@ -57,6 +59,7 @@ public class NotificationsController(IMediator mediator) : BaseController
 
     [HttpGet("user/{userId}")]
     [AuthorizeRoleFilter(Permission = Permissions.Notification.Read)]
+    [Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
     public async Task<IActionResult> GetUserNotifications(
         string userId,
         [FromQuery] QueryNotifications query)
@@ -85,6 +88,7 @@ public class NotificationsController(IMediator mediator) : BaseController
     }
 
     [HttpGet("account")]
+    [Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
     public async Task<IActionResult> GetUserNotifications(
         [FromQuery] QueryNotifications query)
     {
@@ -113,6 +117,7 @@ public class NotificationsController(IMediator mediator) : BaseController
     }
 
     [HttpGet("account/unread-count")]
+    [Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
     public async Task<IActionResult> GetUserUnreadCount()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException("User ID not found in claims.");
@@ -127,6 +132,7 @@ public class NotificationsController(IMediator mediator) : BaseController
 
     [HttpGet("user/{userId}/unread-count")]
     [AuthorizeRoleFilter(Permission = Permissions.Notification.Read)]
+    [Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
     public async Task<IActionResult> GetUnreadCount(string userId)
     {
         var query = new GetUnreadCountQuery(userId);
@@ -136,6 +142,7 @@ public class NotificationsController(IMediator mediator) : BaseController
 
     [HttpPost("{id}/send")]
     [AuthorizeRoleFilter(Permission = Permissions.Notification.Update)]
+    [Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
     public async Task<IActionResult> SendNotification(Guid id)
     {
         var command = new SendNotificationCommand(id);
@@ -145,6 +152,7 @@ public class NotificationsController(IMediator mediator) : BaseController
 
     [HttpPost("{id}/mark-read")]
     [AuthorizeRoleFilter(Permission = Permissions.Notification.Update)]
+    [Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
     public async Task<IActionResult> MarkAsRead(Guid id)
     {
         var command = new MarkNotificationAsReadCommand(id);
@@ -154,6 +162,7 @@ public class NotificationsController(IMediator mediator) : BaseController
 
     [HttpPost("user/{userId}/mark-read")]
     [AuthorizeRoleFilter(Permission = Permissions.Notification.Update)]
+    [Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
     public async Task<IActionResult> MarkAllAsReadAdmin(string userId)
     {
         var command = new MarkAllNotificationsAsReadCommand(userId);
@@ -162,6 +171,7 @@ public class NotificationsController(IMediator mediator) : BaseController
     }
 
     [HttpPost("account/mark-all-read")]
+    [Authorize(AuthenticationSchemes = APIConstants.Authentication.CustomAuthScheme)]
     public async Task<IActionResult> MarkAllAsRead()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -169,6 +179,34 @@ public class NotificationsController(IMediator mediator) : BaseController
             return UnauthorizedResponse();
 
         var command = new MarkAllNotificationsAsReadCommand(userId);
+        var result = await _mediator.Send(command);
+        return SuccessResponse(result);
+    }
+
+
+    [HttpGet("account-anonymous")]
+    public async Task<IActionResult> GetUserNotificationsAnonymous([FromQuery] QueryNotifications query)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException("User ID not found in claims.");
+
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(StandardResponse<object, object>.ValidationError("User ID is required."));
+
+        var command = new GetNotificationsQuery()
+        {
+            UserId = userId,
+            Page = query.Page,
+            Limit = query.Limit,
+            Status = query.Status,
+            Type = query.Type,
+            Recipient = query.Recipient,
+            Sender = query.Sender,
+            TemplateId = query.TemplateId,
+            Search = query.Search,
+            Id = query.Id,
+            IsRead = query.IsRead,
+            Priority = query.Priority,
+        };
         var result = await _mediator.Send(command);
         return SuccessResponse(result);
     }
