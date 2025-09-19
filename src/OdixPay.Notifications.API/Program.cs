@@ -119,7 +119,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors(corsPolicyName);
 
 // HTTPS redirection middleware
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 
 

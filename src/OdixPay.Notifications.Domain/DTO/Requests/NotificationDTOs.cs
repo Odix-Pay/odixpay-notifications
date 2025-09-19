@@ -70,7 +70,7 @@ public class CreateNotificationBaseRequest : IValidatableObject
         if (Type == NotificationType.Push && !string.IsNullOrWhiteSpace(Recipient))
         {
             // Simple device token validation (can be improved with regex)
-            if (Recipient.Length < 10 || Recipient.Length > 100)
+            if (Recipient.Length < 10)
             {
                 yield return new ValidationResult("Recipient must be a valid device token.", [nameof(Recipient)]);
             }

@@ -10,6 +10,7 @@ using OdixPay.Notifications.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 using OdixPay.Notifications.Domain.DTO.Responses.AuthService;
 using OdixPay.Notifications.Domain.DTO.Requests;
+using FirebaseAdmin.Auth;
 
 namespace OdixPay.Notifications.Infrastructure.Services;
 
@@ -29,17 +30,18 @@ public class AuthenticationService(
     {
         try
         {
+            _logger.LogInformation("Starting authentication process.");
+
             var (tokenType, cleanToken, keyId) = IdentifyTokenType(token);
 
             _logger.LogInformation("Token type gotten for key: {KeyId}", keyId);
 
-            var publicKey = await GetPublicKeyAsync(keyId);
+            GetPublicKeyResponse? publicKey = tokenType != TokenType.Firebase ? await GetPublicKeyAsync(keyId) : null;
 
             _logger.LogInformation("Public key retrieved for key: {KeyId}", keyId);
 
-            var validToken = ValidateToken(cleanToken, publicKey.PublicKey, tokenType);
+            var validToken = await ValidateToken(cleanToken, publicKey?.PublicKey, tokenType);
 
-            _logger.LogInformation("Token validated for key: {KeyId}", keyId);
 
             return validToken;
         }
@@ -58,7 +60,7 @@ public class AuthenticationService(
 
             if (string.IsNullOrEmpty(userId))
             {
-                return AuthorizationResult.Unauthorized("User ID is missing or empty");
+                return AuthorizationResult.Unauthorized("User is not authenticated");
             }
 
             // Check if the role has permission for the requested action and resource
@@ -66,11 +68,10 @@ public class AuthenticationService(
 
             if (!hasPermission)
             {
-                return AuthorizationResult.Unauthorized("User does not have permission to perform this action on this resource");
+                return AuthorizationResult.Unauthorized("User is not authorized");
             }
 
             return AuthorizationResult.Success();
-
         }
         catch (Exception)
         {
@@ -99,6 +100,13 @@ public class AuthenticationService(
             var cleanToken = token["Signature ".Length..];
             var keyId = cleanToken.Split('.')[0]; // Example: "keyId.payload.signature"
             return (TokenType.Signature, cleanToken, keyId);
+        }
+
+        if (token.StartsWith("Firebase "))
+        {
+            _logger.LogInformation("Identified Firebase token.");
+            var cleanToken = token["Firebase ".Length..];
+            return (TokenType.Firebase, cleanToken.Trim(), string.Empty);
         }
 
         throw new SecurityException("Invalid token format");
@@ -130,18 +138,19 @@ public class AuthenticationService(
         return publicKey;
     }
 
-    private AuthenticationResult ValidateToken(string token, string publicKey, TokenType tokenType)
+    private async Task<AuthenticationResult> ValidateToken(string token, string publicKey, TokenType tokenType)
     {
         return tokenType switch
         {
-            TokenType.Bearer => ValidateJwtToken(token, publicKey),
-            TokenType.Signature => ValidateSignatureToken(token, publicKey),
+            TokenType.Bearer => await ValidateJwtToken(token, publicKey),
+            TokenType.Signature => await ValidateSignatureToken(token, publicKey),
+            TokenType.Firebase => await ValidateFirebaseToken(token),
             _ => throw new ArgumentOutOfRangeException(nameof(tokenType),
                 $"Unsupported token type: {tokenType}")
         };
     }
 
-    private AuthenticationResult ValidateJwtToken(string token, string publicKey)
+    private async Task<AuthenticationResult> ValidateJwtToken(string token, string publicKey)
     {
         try
         {
@@ -168,7 +177,7 @@ public class AuthenticationService(
             return new AuthenticationResult
             {
                 IsAuthenticated = true,
-                UserId = principal.FindFirst("userId")?.Value ?? principal.FindFirst("nameid")?.Value ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                UserId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? principal.FindFirst("userId")?.Value ?? principal.FindFirst("nameid")?.Value,
                 Role = principal.FindFirst(ClaimTypes.Role)?.Value,
                 KeyId = principal.FindFirst("keyid")?.Value ?? keyId,
                 PublicKey = publicKey,
@@ -182,7 +191,7 @@ public class AuthenticationService(
         }
     }
 
-    private AuthenticationResult ValidateSignatureToken(string token, string publicKey)
+    private async Task<AuthenticationResult> ValidateSignatureToken(string token, string publicKey)
     {
         try
         {
@@ -219,6 +228,34 @@ public class AuthenticationService(
         }
     }
 
+    private async Task<AuthenticationResult> ValidateFirebaseToken(string token)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(token))
+                throw new ArgumentNullException(nameof(token), "Token cannot be null or empty");
+
+            var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+
+            // You can add more checks here if needed (audience, issuer, etc.)
+            return new AuthenticationResult
+            {
+                IsAuthenticated = true,
+                UserId = decodedToken.Subject,
+                Role = string.Empty, // You can extract role from custom claims if set up
+                KeyId = decodedToken.Issuer,
+                PublicKey = null,
+                Region = "europe" // Default to europe if not set
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Firebase token validation failed: {Message}", ex.Message);
+            // Log ex if needed
+            return new AuthenticationResult { IsAuthenticated = false, ErrorMessage = ex.Message };
+        }
+    }
+
     private async Task<string?> GetUserRole(string userId)
     {
         // Get user role from cache, if exists, retu
@@ -226,6 +263,5 @@ public class AuthenticationService(
 
         return roleData?.Name;
     }
-
 
 }

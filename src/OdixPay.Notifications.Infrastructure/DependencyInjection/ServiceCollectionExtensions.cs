@@ -16,6 +16,8 @@ using OdixPay.Notifications.Contracts.Interfaces;
 using OdixPay.Notifications.Infrastructure.Services.StartupTasks.TransactionDetectionEvents;
 using OdixPay.Notifications.Infrastructure.Services.StartupTasks.AppSettingsChanged;
 using OdixPay.Notifications.Infrastructure.Services.StartupTasks.RealtimeNotifications;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 namespace OdixPay.Notifications.Infrastructure.DependencyInjection;
 
@@ -23,13 +25,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Constants
-        var RedisConnstring = configuration.GetConnectionString("Redis");
-
-        if (string.IsNullOrEmpty(RedisConnstring))
-        {
-            throw new InvalidOperationException("Redis connection string is not configured. Please set it in the application settings.");
-        }
         // Add Db Configuration
         services.Configure<DbConfig>(configuration.GetSection("DbConfig"));
         services.Configure<RoleServiceHTTPClientConfig>(configuration.GetSection("RoleService"));
@@ -38,6 +33,7 @@ public static class ServiceCollectionExtensions
         services.Configure<BrevoConfig>(configuration.GetSection("Brevo"));
         services.Configure<TwilioConfig>(configuration.GetSection("Twilio"));
         services.Configure<FirebaseConfig>(configuration.GetSection("FirebaseConfig"));
+        services.Configure<RedisConfig>(configuration.GetSection("Redis"));
 
         // Add Db Connection Factory
         services.AddSingleton<IConnectionFactory, ConnectionFactory>();
@@ -113,10 +109,11 @@ public static class ServiceCollectionExtensions
         // Add Distributed Cache Service
         services.AddSingleton<IConnectionMultiplexer>(sp =>
         {
+            var redisConfig = sp.GetRequiredService<IOptions<RedisConfig>>().Value ?? throw new ArgumentNullException(nameof(RedisConfig), "Redis configuration is not provided.");
 
-            Console.WriteLine("Initializing Redis connection...");
+            Console.WriteLine($"Initializing Redis connection...: {redisConfig.GetMaskedConnectionString()}");
 
-            return ConnectionMultiplexer.Connect(RedisConnstring);
+            return ConnectionMultiplexer.Connect(redisConfig.GetConnectionString());
         });
         services.AddSingleton<IDistributedCacheService, RedisCacheService>();
 
@@ -129,8 +126,11 @@ public static class ServiceCollectionExtensions
         }) // Include Redis backplane for SignalR - This enables scaling out to multiple servers (replica sets).
         .AddStackExchangeRedis(opts =>
         {
+            var redisConfig = services.BuildServiceProvider().GetRequiredService<IOptions<RedisConfig>>().Value ?? throw new ArgumentNullException(nameof(RedisConfig), "Redis configuration is not provided.");
 
-            var cfg = ConfigurationOptions.Parse(RedisConnstring);
+            Console.WriteLine($"Initializing Redis connection...: {redisConfig.GetMaskedConnectionString()}");
+
+            var cfg = ConfigurationOptions.Parse(redisConfig.GetConnectionString());
             cfg.AbortOnConnectFail = false;
             cfg.ConnectRetry = 5;
             cfg.ReconnectRetryPolicy = new ExponentialRetry(5000);
@@ -160,6 +160,14 @@ public static class ServiceCollectionExtensions
         services.AddHostedService<SubscribeToScanningEvents>();
         services.AddHostedService<AppSettingsChangedEventsHandler>();
         services.AddHostedService<RealtimeNotificationsHandler>();
+
+        // Configure firebase instance
+        var firebaseConfig = configuration.GetSection("FirebaseConfig").Get<FirebaseConfig>() ?? throw new ArgumentNullException(nameof(FirebaseConfig), "Firebase configuration is not provided.");
+        FirebaseApp.Create(new AppOptions()
+        {
+            Credential = GoogleCredential.FromFile(firebaseConfig.ServiceAccountKeyPath),
+            ProjectId = firebaseConfig.ProjectId
+        });
 
 
         return services;
