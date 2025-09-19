@@ -183,18 +183,18 @@ public class NotificationsController(IMediator mediator) : BaseController
         return SuccessResponse(result);
     }
 
-
+    [AllowAnonymous]
     [HttpGet("account-anonymous")]
     public async Task<IActionResult> GetUserNotificationsAnonymous([FromQuery] QueryNotifications query)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException("User ID not found in claims.");
+        //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException("User ID not found in claims.");
 
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized(StandardResponse<object, object>.ValidationError("User ID is required."));
+        //if (string.IsNullOrEmpty(query.UserId))
+        //    return Unauthorized(StandardResponse<object, object>.ValidationError("User ID is required."));
 
         var command = new GetNotificationsQuery()
         {
-            UserId = userId,
+            UserId = query.UserId,
             Page = query.Page,
             Limit = query.Limit,
             Status = query.Status,
