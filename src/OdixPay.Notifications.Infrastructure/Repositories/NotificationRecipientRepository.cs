@@ -54,7 +54,17 @@ public class NotificationRecipientRepository(IConnectionFactory connectionFactor
         cancellationToken.ThrowIfCancellationRequested();
 
         using var connection = _connectionFactory.CreateConnection();
+        //var parameters = new DynamicParameters();
 
+        //parameters.Add("@Id", recipient.Id == Guid.Empty ? (object)DBNull.Value : recipient.Id, DbType.Guid);
+        //parameters.Add("@Name", recipient.Name, DbType.String);
+        //parameters.Add("@UserId", recipient.UserId, DbType.String);
+        //parameters.Add("@Type", (int)recipient.Type, DbType.Int32);
+        //parameters.Add("@Recipient", recipient.Recipient, DbType.String);
+        //parameters.Add("@IsActive", recipient.IsActive, DbType.Boolean);
+        //parameters.Add("@DefaultLanguage", string.IsNullOrWhiteSpace(recipient.DefaultLanguage) ? "en" : recipient.DefaultLanguage, DbType.String);
+
+        //await connection.ExecuteAsync(StoredProcedures.NotificationRecipient.Create, parameters, commandType: CommandType.StoredProcedure);
         var parameters = new
         {
             recipient.Id,
@@ -65,6 +75,7 @@ public class NotificationRecipientRepository(IConnectionFactory connectionFactor
             recipient.IsActive,
             recipient.DefaultLanguage
         };
+        Console.WriteLine(parameters);
 
         await connection.ExecuteAsync(StoredProcedures.NotificationRecipient.Create, parameters, commandType: CommandType.StoredProcedure);
     }
